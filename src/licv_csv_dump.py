@@ -18,17 +18,17 @@ locale.setlocale(locale.LC_NUMERIC, "de_DE.UTF-8")
 
 header = json.loads(CFG["header"].read_text())
 hp = Luxtronik(CFG["hp_ip"], CFG["hp_port"])
-hp.read()                                           # 
+calculations, parameters, _ = hp.read()
 
 now = dt.datetime.now()
 row = {
     "Timestamp": int(now.timestamp()),
     "DateTime":  now.strftime("%d.%m.%Y %H:%M:%S"),
 }
-calculations = {c.name: c.value for c in hp.calculations}
-parameters = {p.name: p.value for p in hp.parameters}
-row.update(calculations)
-row.update(parameters)
+calc_dict = {c.name: c.value for c in calculations}
+param_dict = {p.name: p.value for p in parameters}
+row.update(calc_dict)
+row.update(param_dict)
 
 # keep *exact* column order & pads missing keys with empty field
 row = {k: (locale.format_string("%.1f", row[k]) if isinstance(row.get(k), float) else row.get(k, ""))
