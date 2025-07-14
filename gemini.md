@@ -2,21 +2,23 @@
 
 ## Evaluation
 
-The project consists of a Python script (`licv_csv_dump.py`) that appears to process a proprietary data file (`.dta.csv`) from a Luxtronik heat pump controller and convert it into a standard CSV format. The script `csv-headers.py` and the JSON file `header.json` are used to generate the correct headers for the CSV file.
+The project consists of a script that processes data from a Luxtronik heat pump controller and converts it into a standard CSV format.
 
-The code is currently a collection of scripts and would benefit from being structured as a proper Python project. This will make it more maintainable, testable, and easier to deploy.
+The initial Python implementation faced insurmountable issues with the `Bouni/python-luxtronik` library within the Docker environment. Despite the container having network access, the library failed to connect.
+
+The project has been pivoted to a Node.js implementation using the `coolchip/luxtronik2` library, which is expected to be more reliable in a containerized environment.
 
 ## Task List
 
 - [x] Initialize a Git repository.
 - [x] Create a `gemini.md` file with an evaluation and task list.
-- [x] Structure the project as a proper Python project:
-    - [x] Create a `pyproject.toml` for project metadata and dependencies.
-    - [x] Use `venv` for a virtual environment.
-    - [x] Create a `src` directory for the main source code.
-    - [x] Move the scripts into the `src` directory.
-    - [x] Create a `tests` directory for unit tests.
-- [x] Run `licv_csv_dump.py` to test the application.
-- [x] Wrap the application in a Docker container.
-- [x] Analyze the data to determine the run frequency.
-- [x] Create daily roll-ups of the output.
+- [x] Structure the project as a proper Python project.
+- [x] **Pivot to Node.js due to Python library issues.**
+- [x] Initialize a Node.js project.
+- [x] Implement data dumping and CSV generation in Node.js.
+- [x] Implement daily roll-ups in Node.js.
+- [x] Create a Node.js-based Dockerfile.
+- [x] Update the README.
+- [ ] Verify the Node.js implementation.
+- [ ] Analyze the data to determine the run frequency.
+- [ ] Create daily roll-ups of the output.

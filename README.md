@@ -1,18 +1,16 @@
-# Luxtronik Logger
+# Luxtronik Logger (Node.js)
 
-This project logs data from a Luxtronik heat pump controller and saves it to CSV files.
+This project logs data from a Luxtronik heat pump controller and saves it to CSV files. This version uses Node.js.
 
 ## Setup
 
-1.  Create a virtual environment: `python3 -m venv .venv`
-2.  Activate the virtual environment: `source .venv/bin/activate`
-3.  Install the dependencies: `pip install .`
+1.  Install Node.js (v18 or higher).
+2.  Install dependencies: `npm install`
 
 ## Usage
 
--   To generate the `header.json` file (only needs to be done once): `python src/csv-headers.py`
--   To log data from the heat pump: `python src/licv_csv_dump.py`
--   To create daily roll-ups: `python src/rollup.py`
+-   To log data from the heat pump (this will also create the `header.json` on first run): `node src/index.js`
+-   To create daily roll-ups: `node src/rollup.js`
 
 ## Docker
 
@@ -25,5 +23,7 @@ docker build -t luxtronik-logger .
 To run the Docker container:
 
 ```
-docker run -v $(pwd)/data:/app/data luxtronik-logger
+# Note: You may need to use --network="host" on Linux systems
+# if the heatpump is not discoverable otherwise.
+docker run --rm -v "$(pwd)/data:/app/data" luxtronik-logger
 ```
