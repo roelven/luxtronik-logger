@@ -25,8 +25,8 @@ row = {
     "Timestamp": int(now.timestamp()),
     "DateTime":  now.strftime("%d.%m.%Y %H:%M:%S"),
 }
-calculations = {c.name: c.value for c in hp.calculations}
-parameters = {p.name: p.value for p in hp.parameters}
+calculations = {c.name: c.value for c in hp.calculations.values}
+parameters = {p.name: p.value for p in hp.parameters.values}
 row.update(calculations)
 row.update(parameters)
 
