@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+# licv_csv_dump.py – run every 5 min via cron
+import csv, datetime as dt, json, pathlib, locale
+from luxtronik import Luxtronik                     # pip install luxtronik
+
+CFG = {
+    "hp_ip":   "192.168.20.180",
+    "hp_port": 8889,                                # 8888 on very old FW
+    "header":  pathlib.Path("header.json"),
+    "out":     pathlib.Path("live.dta.csv"),
+}
+
+# german decimal comma like the USB export
+locale.setlocale(locale.LC_NUMERIC, "de_DE.UTF-8")
+
+header = json.loads(CFG["header"].read_text())
+hp = Luxtronik(CFG["hp_ip"], CFG["hp_port"])
+hp.read()                                           # ≈120 ms
+
+now = dt.datetime.now()
+row = {
+    "Timestamp": int(now.timestamp()),
+    "DateTime":  now.strftime("%d.%m.%Y %H:%M:%S"),
+    **hp.calculations,          # >800 live values
+    **hp.parameters,            # settings snapshot
+}
+
+# keep *exact* column order & pads missing keys with empty field
+row = {k: (locale.format_string("%.1f", row[k]) if isinstance(row.get(k), float) else row.get(k, ""))
+        for k in header}
+
+CFG["out"].parent.mkdir(parents=True, exist_ok=True)
+write_head = not CFG["out"].exists()
+with CFG["out"].open("a", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=header, delimiter=";", lineterminator="\r\n")
+    if write_head:
+        w.writeheader()
+    w.writerow(row)
