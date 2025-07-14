@@ -21,11 +21,16 @@ docker build -t luxtronik-logger .
 
 The container is designed to run, log the current data once, and then exit. To collect data continuously, you should use an external scheduler like `cron` on your host machine to run the container at a regular interval.
 
-Here is an example `crontab` entry to run the logger every 5 minutes. **Note:** You must replace `/path/to/your/project/data` with the absolute path to this project's `data` directory on your machine.
+You can configure the heat pump's IP address and port using environment variables.
+
+-   `LUXTRONIK_IP`: The IP address of your heat pump (defaults to `192.168.20.180`).
+-   `LUXTRONIK_PORT`: The port for the controller (defaults to `8889`).
+
+Here is an example `crontab` entry to run the logger every 5 minutes, overriding the default IP. **Note:** You must replace `/path/to/your/project/data` with the absolute path to this project's `data` directory on your machine.
 
 ```sh
 # Edit your crontab with: crontab -e
-*/5 * * * * docker run --rm -v /path/to/your/project/data:/app/data luxtronik-logger
+*/5 * * * * docker run --rm -e LUXTRONIK_IP=192.168.1.100 -v /path/to/your/project/data:/app/data luxtronik-logger
 ```
 *On some systems (like Docker Desktop for Mac/Windows), you may need to add `--network="host"` or other networking solutions if the container cannot reach your heat pump.*
 

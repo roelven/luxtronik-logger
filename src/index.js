@@ -8,8 +8,8 @@ const configDir = path.join(projectRoot, 'config');
 const dataDir = path.join(projectRoot, 'data');
 
 const CFG = {
-    hp_ip: '192.168.20.180',
-    hp_port: 8889,
+    hp_ip: process.env.LUXTRONIK_IP || '192.168.20.180',
+    hp_port: parseInt(process.env.LUXTRONIK_PORT, 10) || 8889,
     header_file: path.join(configDir, 'header.json'),
     out_file: path.join(dataDir, 'live.dta.csv'),
 };
