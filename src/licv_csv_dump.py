@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-# licv_csv_dump.py – run every 5 min via cron
+# licv_csv_dump.py 
 import csv, datetime as dt, json, pathlib, locale
 from luxtronik import Luxtronik                     # pip install luxtronik
+
+# Determine the project root directory
+project_root = pathlib.Path(__file__).parent.parent
 
 CFG = {
     "hp_ip":   "192.168.20.180",
     "hp_port": 8889,                                # 8888 on very old FW
-    "header":  pathlib.Path("header.json"),
-    "out":     pathlib.Path("live.dta.csv"),
+    "header":  project_root / "config" / "header.json",
+    "out":     project_root / "data" / "live.dta.csv",
 }
 
 # german decimal comma like the USB export
@@ -15,7 +18,7 @@ locale.setlocale(locale.LC_NUMERIC, "de_DE.UTF-8")
 
 header = json.loads(CFG["header"].read_text())
 hp = Luxtronik(CFG["hp_ip"], CFG["hp_port"])
-hp.read()                                           # ≈120 ms
+hp.read()                                           # 
 
 now = dt.datetime.now()
 row = {
