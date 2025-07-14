@@ -10,14 +10,19 @@ A sensible frequency for data collection is **every 5 minutes**. This provides a
 
 ## Docker Usage
 
-### Build the Image
+### Prerequisites
 
-First, build the Docker image:
+1.  **Docker Installed:** The host machine must have Docker installed and running.
+2.  **Image Built:** You must first build the logger image on the same machine where you intend to run the `cron` jobs.
+
+### 1. Build the Image
+
+Build the Docker image using the following command from the project's root directory:
 ```
 docker build -t luxtronik-logger .
 ```
 
-### Running the Logger Periodically
+### 2. Run the Logger Periodically
 
 The container is designed to run, log the current data once, and then exit. To collect data continuously, you should use an external scheduler like `cron` on your host machine to run the container at a regular interval.
 
@@ -34,7 +39,7 @@ Here is an example `crontab` entry to run the logger every 5 minutes, overriding
 ```
 *On some systems (like Docker Desktop for Mac/Windows), you may need to add `--network="host"` or other networking solutions if the container cannot reach your heat pump.*
 
-### Triggering the Daily Rollup
+### 3. Trigger the Daily Rollup
 
 The daily rollup script should be run once a day, preferably shortly after midnight, to process the previous day's logs. You can also use `cron` for this.
 
