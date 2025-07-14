@@ -18,7 +18,11 @@ locale.setlocale(locale.LC_NUMERIC, "de_DE.UTF-8")
 
 header = json.loads(CFG["header"].read_text())
 hp = Luxtronik(CFG["hp_ip"], CFG["hp_port"])
-calculations, parameters, _ = hp.read()
+read_result = hp.read()
+if read_result is None:
+    print(f"Error: Could not connect to heat pump at {CFG['hp_ip']}:{CFG['hp_port']}")
+    exit(1)
+calculations, parameters, _ = read_result
 
 now = dt.datetime.now()
 row = {
