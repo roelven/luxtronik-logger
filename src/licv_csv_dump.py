@@ -3,6 +3,13 @@
 import csv, datetime as dt, json, pathlib, locale
 from luxtronik import Luxtronik                     # pip install luxtronik
 
+import time
+
+# ... (rest of the imports)
+
+# Add a delay to allow the container network to initialize
+time.sleep(5)
+
 # Determine the project root directory
 project_root = pathlib.Path(__file__).parent.parent
 
