@@ -8,15 +8,15 @@ The code is currently a collection of scripts and would benefit from being struc
 
 ## Task List
 
-- [ ] Initialize a Git repository.
-- [ ] Create a `gemini.md` file with an evaluation and task list.
-- [ ] Structure the project as a proper Python project:
-    - [ ] Create a `pyproject.toml` for project metadata and dependencies.
-    - [ ] Use `venv` for a virtual environment.
-    - [ ] Create a `src` directory for the main source code.
-    - [ ] Move the scripts into the `src` directory.
-    - [ ] Create a `tests` directory for unit tests.
-- [ ] Run `licv_csv_dump.py` to test the application.
-- [ ] Wrap the application in a Docker container.
-- [ ] Analyze the data to determine the run frequency.
-- [ ] Create daily roll-ups of the output.
+- [x] Initialize a Git repository.
+- [x] Create a `gemini.md` file with an evaluation and task list.
+- [x] Structure the project as a proper Python project:
+    - [x] Create a `pyproject.toml` for project metadata and dependencies.
+    - [x] Use `venv` for a virtual environment.
+    - [x] Create a `src` directory for the main source code.
+    - [x] Move the scripts into the `src` directory.
+    - [x] Create a `tests` directory for unit tests.
+- [x] Run `licv_csv_dump.py` to test the application.
+- [x] Wrap the application in a Docker container.
+- [x] Analyze the data to determine the run frequency.
+- [x] Create daily roll-ups of the output.
