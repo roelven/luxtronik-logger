@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Papa = require('papaparse');
-const { Luxtronik } = require('luxtronik2');
+const luxtronik = require('luxtronik2');
 
 const projectRoot = path.resolve(__dirname, '..');
 const configDir = path.join(projectRoot, 'config');
@@ -18,11 +18,23 @@ const CFG = {
 if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
+// Promisify the read function
+function readPump(pump) {
+    return new Promise((resolve, reject) => {
+        pump.read((err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(data);
+        });
+    });
+}
+
 async function main() {
-    const pump = new Luxtronik(CFG.hp_ip, CFG.hp_port);
+    const pump = luxtronik.createConnection(CFG.hp_ip, CFG.hp_port);
 
     try {
-        const data = await pump.read();
+        const data = await readPump(pump);
         const calculations = data.calculations;
         const parameters = data.parameters;
 
