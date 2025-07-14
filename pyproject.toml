@@ -1,0 +1,5 @@
+[project]
+name = "luxtronik-logger"
+version = "0.1.0"
+description = "A tool to log data from a Luxtronik heat pump controller."
+dependencies = []
