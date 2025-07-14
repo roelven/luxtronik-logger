@@ -19,6 +19,6 @@ The project has been pivoted to a Node.js implementation using the `coolchip/lux
 - [x] Implement daily roll-ups in Node.js.
 - [x] Create a Node.js-based Dockerfile.
 - [x] Update the README.
-- [ ] Verify the Node.js implementation.
-- [ ] Analyze the data to determine the run frequency.
-- [ ] Create daily roll-ups of the output.
+- [x] Verify the Node.js implementation.
+- [x] Analyze the data to determine the run frequency.
+- [x] Create daily roll-ups of the output.
