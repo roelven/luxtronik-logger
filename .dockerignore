@@ -6,4 +6,4 @@ __pycache__
 *.pyo
 *.pyd
 data/live.dta.csv
-data/*.csv
+data/????-??-??.csv
