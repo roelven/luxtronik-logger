@@ -3,11 +3,16 @@
 import csv, datetime as dt, json, pathlib, locale
 from luxtronik import Luxtronik                     # pip install luxtronik
 
+import os
+
+# ... (rest of the imports)
+
 # Determine the project root directory
 project_root = pathlib.Path(__file__).parent.parent
 
 CFG = {
-    "hp_ip":   "192.168.20.180",
+    # Use environment variable for IP, default to localhost
+    "hp_ip":   os.environ.get("LUXTRONIK_IP", "127.0.0.1"),
     "hp_port": 8889,                                # 8888 on very old FW
     "header":  project_root / "config" / "header.json",
     "out":     project_root / "data" / "live.dta.csv",
