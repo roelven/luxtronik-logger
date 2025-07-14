@@ -1,1 +1,3 @@
 .venv/
+build/
+src/luxtronik_logger.egg-info/
