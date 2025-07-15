@@ -37,11 +37,26 @@ async function main() {
     }
 
     const now = new Date();
+    const rawData = {
+        ...data.calculations,
+        ...data.parameters,
+    };
+
+    // Flatten the data to handle nested objects
+    const flattenedData = {};
+    for (const [key, value] of Object.entries(rawData)) {
+        if (typeof value === 'object' && value !== null) {
+            // For nested objects, stringify them
+            flattenedData[key] = JSON.stringify(value);
+        } else {
+            flattenedData[key] = value;
+        }
+    }
+
     const rowData = {
         Timestamp: Math.floor(now.getTime() / 1000),
         DateTime: now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }),
-        ...data.calculations,
-        ...data.parameters,
+        ...flattenedData,
     };
 
     let rows = [];
