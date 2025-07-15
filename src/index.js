@@ -65,14 +65,20 @@ async function main() {
             return acc;
         }, {});
 
-        const writeHeader = !fs.existsSync(CFG.out_file);
+        const fileExists = fs.existsSync(CFG.out_file);
+
+        // Use Papa.unparse to generate the CSV string for the new row
+        // The `header` option is only true if the file does NOT exist
         const csv = Papa.unparse([row], {
-            header: writeHeader,
+            header: !fileExists,
             delimiter: ';',
             newline: '\r\n',
         });
 
-        fs.appendFileSync(CFG.out_file, csv + '\r\n');
+        // Append the new CSV data (with or without header) to the file
+        // We add an extra newline if the file already exists to ensure separation
+        fs.appendFileSync(CFG.out_file, (fileExists ? '\n' : '') + csv);
+
         console.log(`OK ${CFG.out_file} ${now.toISOString()}`);
 
     } catch (error) {
