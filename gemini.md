@@ -18,6 +18,7 @@ The project has been pivoted to a Node.js implementation using the `coolchip/lux
 - [x] Implement data dumping and CSV generation in Node.js.
 - [x] Implement daily roll-ups in Node.js.
 - [x] Create a Node.js-based Dockerfile.
+- [x] **Abandon Docker due to network issues; pivot to host-based execution.**
 - [x] Update the README.
 - [x] Verify the Node.js implementation.
 - [x] Analyze the data to determine the run frequency.

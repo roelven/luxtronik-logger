@@ -1,53 +1,52 @@
 # Luxtronik Logger (Node.js)
 
-This project logs data from a Luxtronik heat pump controller and saves it to CSV files using a Docker container.
+This project logs data from a Luxtronik heat pump controller and saves it to CSV files.
 
 ## Data Collection and Frequency
 
-Each time the container runs, it captures a **point-in-time snapshot** of the heat pump's current state, including all available calculations and parameters. It does not retrieve historical data; it only logs the values at the moment of execution.
+Each time the script runs, it captures a **point-in-time snapshot** of the heat pump's current state. A sensible frequency for data collection is **every 5 minutes**.
 
-A sensible frequency for data collection is **every 5 minutes**. This provides a good balance between data granularity for analysis and minimizing the load on the heat pump's controller. Running every 5 minutes will generate 288 data points per day.
+## Setup and Usage
 
-## Docker Usage
+This project is designed to be run directly on a host with Node.js, scheduled with `cron`.
 
-### Prerequisites
+### 1. Install Prerequisites
 
-1.  **Docker Installed:** The host machine must have Docker installed and running.
-2.  **Image Built:** You must first build the logger image on the same machine where you intend to run the `cron` jobs.
-
-### 1. Build the Image
-
-Build the Docker image using the following command from the project's root directory:
-```
-docker build -t luxtronik-logger .
+On your host machine (e.g., your server), install Node.js and npm:
+```sh
+sudo apt-get update && sudo apt-get install -y nodejs npm
 ```
 
-### 2. Run the Logger Periodically
+### 2. Install Application Dependencies
 
-The container is designed to run, log the current data once, and then exit. To collect data continuously, you should use an external scheduler like `cron` on your host machine to run the container at a regular interval.
+Clone the repository and install the necessary Node.js packages:
+```sh
+# Clone the repository (if you haven't already)
+# git clone https://github.com/roelven/luxtronik-logger.git
 
-You can configure the heat pump's IP address and port using environment variables.
+cd luxtronik-logger
+npm install
+```
 
--   `LUXTRONIK_IP`: The IP address of your heat pump (defaults to `192.168.20.180`).
+### 3. Configure Environment Variables
+
+The script is configured using environment variables. You can set these in your `crontab` file.
+
+-   `LUXTRONIK_IP`: The IP address of your heat pump.
 -   `LUXTRONIK_PORT`: The port for the controller (defaults to `8889`).
 
-Here is an example `crontab` entry to run the logger every 5 minutes, overriding the default IP. **Note:** You must replace `/path/to/your/project/data` with the absolute path to this project's `data` directory on your machine.
+### 4. Schedule with Cron
+
+Use `crontab -e` to set up the automated jobs.
+
+**Note:** Replace `/path/to/luxtronik-logger` with the absolute path to where you cloned the project.
 
 ```sh
 # Edit your crontab with: crontab -e
-*/5 * * * * docker run --rm -e LUXTRONIK_IP=192.168.1.100 -v /path/to/your/project/data:/app/data luxtronik-logger
-```
-*On some systems (like Docker Desktop for Mac/Windows), you may need to add `--network="host"` or other networking solutions if the container cannot reach your heat pump.*
 
-### 3. Trigger the Daily Rollup
+# Run the data logger every 5 minutes
+*/5 * * * * cd /path/to/luxtronik-logger && export LUXTRONIK_IP=192.168.20.180 && /usr/bin/node src/index.js
 
-The daily rollup script should be run once a day, preferably shortly after midnight, to process the previous day's logs. You can also use `cron` for this.
-
-This command runs the `rollup.js` script inside a new container.
-
-Here is an example `crontab` entry to run the rollup every day at 5 minutes past midnight. **Note:** Remember to use the correct absolute path to your `data` directory.
-
-```sh
-# Edit your crontab with: crontab -e
-5 0 * * * docker run --rm -v /path/to/your/project/data:/app/data luxtronik-logger node src/rollup.js
+# Run the daily rollup at 5 minutes past midnight
+5 0 * * * cd /path/to/luxtronik-logger && /usr/bin/node src/rollup.js
 ```
