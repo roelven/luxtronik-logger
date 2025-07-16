@@ -1,4 +1,11 @@
-.venv/
-build/
-src/luxtronik_logger.egg-info/
-data/live.dta.csv
+# Python
+*.egg-info/
+__pycache__/
+
+# OS-specific
+.DS_Store
+
+# Log and cache files
+data/datalog.jsonl
+data/daemon.log
+data/*.csv
