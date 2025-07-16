@@ -23,7 +23,33 @@ DATA_DIR = "data"
 LOG_FILE = os.path.join(DATA_DIR, "daemon.log")
 CACHE_FILE = os.path.join(DATA_DIR, "datalog.jsonl")
 HEADER_FILE = "config/header.json"
-MAPPING_FILE = "config/header-mapping-int.json"
+MAPPING_FILE = "config/final-mapping.json"
+
+# --- Data Transformation ---
+
+def transform_value(value, data_type):
+    """Transforms a value based on its data type."""
+    if data_type == "celsius":
+        return float(value) / 10.0
+    elif data_type == "bivalence_level":
+        return {
+            0: "no request",
+            1: "one compressor allowed to run",
+            2: "two compressors allowed to run",
+            3: "reheat",
+            4: "reheat & 1 compressor",
+            5: "reheat & 2 compressors"
+        }.get(value, "unknown")
+    elif data_type == "operation_mode":
+        return {
+            0: "heating",
+            1: "hot water",
+            2: "swimming pool/solar",
+            3: "evu",
+            4: "defrost",
+            5: "cooling"
+        }.get(value, "unknown")
+    return value
 
 # --- Logging Setup ---
 logging.basicConfig(
@@ -107,15 +133,18 @@ def generate_csv():
                 if header in ['Datum', 'Uhrzeit']:
                     continue
                 
-                mapped_key = mapping.get(header)
-                if mapped_key is not None:
+                mapping_info = mapping.get(header)
+                if mapping_info:
+                    key = mapping_info.get("key")
+                    data_type = mapping_info.get("type")
+
                     # Find the value in either calculations or parameters
-                    value = record['calculations'].get(str(mapped_key))
+                    value = record['calculations'].get(str(key))
                     if value is None:
-                        value = record['parameters'].get(str(mapped_key))
+                        value = record['parameters'].get(str(key))
                     
                     if value is not None:
-                        row_data[header] = value
+                        row_data[header] = transform_value(value, data_type)
                     else:
                         row_data[header] = ''
                 else:

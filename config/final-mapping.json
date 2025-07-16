@@ -1,0 +1,21 @@
+{
+    "Text_Aussent": { "key": 10, "type": "celsius" },
+    "Text_Mittelt": { "key": 11, "type": "celsius" },
+    "Text_Brauw": { "key": 14, "type": "celsius" },
+    "Text_Vorlauf": { "key": 15, "type": "celsius" },
+    "Text_Ruecklauf": { "key": 16, "type": "celsius" },
+    "Text_Quelle_Ein": { "key": 17, "type": "celsius" },
+    "Text_Quelle_Aus": { "key": 18, "type": "celsius" },
+    "Heissgas": { "key": 19, "type": "celsius" },
+    "Istwert_Aussent": { "key": 10, "type": "celsius" },
+    "Istwert_Mittelt": { "key": 11, "type": "celsius" },
+    "Istwert_Brauw": { "key": 14, "type": "celsius" },
+    "Sollwert_Brauw": { "key": 88, "type": "celsius" },
+    "Istwert_Vorlauf": { "key": 15, "type": "celsius" },
+    "Sollwert_Vorlauf": { "key": 89, "type": "celsius" },
+    "Istwert_Ruecklauf": { "key": 16, "type": "celsius" },
+    "Istwert_Quelle_Ein": { "key": 17, "type": "celsius" },
+    "Istwert_Quelle_Aus": { "key": 18, "type": "celsius" },
+    "Betriebszustand": { "key": 79, "type": "bivalence_level" },
+    "Betriebsart": { "key": 80, "type": "operation_mode" }
+}
