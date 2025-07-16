@@ -7,7 +7,7 @@ import schedule
 import sys
 import time
 from datetime import datetime
-from luxtronik import Luxtronik, discover, discover
+from luxtronik import Luxtronik, discover
 
 load_dotenv()
 
