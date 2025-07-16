@@ -1,52 +1,55 @@
-# Luxtronik Logger (Node.js)
+# Luxtronik Data Logger
 
-This project logs data from a Luxtronik heat pump controller and saves it to CSV files.
+This project provides a Python-based data logger for Luxtronik-controlled heat pumps. It runs as a continuous daemon, collecting data at a configurable interval and saving it to a daily CSV file.
 
-## Data Collection and Frequency
+## Features
 
-Each time the script runs, it captures a **point-in-time snapshot** of the heat pump's current state. A sensible frequency for data collection is **every 5 minutes**.
+-   **Continuous Logging:** Runs as a background service to log data 24/7.
+-   **Resilient:** Recovers from crashes by saving data to a temporary cache file.
+-   **Daily CSV Roll-ups:** Automatically generates a new CSV file every day with the previous 24 hours of data.
+-   **Configurable:** Logging interval and CSV generation time can be easily configured.
 
-## Setup and Usage
+## Setup
 
-This project is designed to be run directly on a host with Node.js, scheduled with `cron`.
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd luxtronik-logger
+    ```
 
-### 1. Install Prerequisites
+2.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-On your host machine (e.g., your server), install Node.js and npm:
-```sh
-sudo apt-get update && sudo apt-get install -y nodejs npm
+3.  **Configure the logger:**
+    -   Open `src/logger_daemon.py` and edit the following parameters if needed:
+        -   `HOST`: The IP address of your heat pump.
+        -   `PORT`: The port of your heat pump (usually 8889).
+        -   `LOG_INTERVAL_SECONDS`: The interval in seconds at which to log data.
+        -   `CSV_GENERATION_TIME`: The time of day to generate the daily CSV file.
+
+4.  **Configure the data mapping:**
+    -   The `config/header-mapping-int.json` file maps the integer keys from the `python-luxtronik` library to the headers in the output CSV file. You can edit this file to add or change mappings.
+
+## Usage
+
+### Running the Daemon
+
+To run the logger as a background process, you can use `nohup`:
+
+```bash
+nohup python3 src/logger_daemon.py &
 ```
 
-### 2. Install Application Dependencies
+The logger will run in the background and log any output to `data/daemon.log`.
 
-Clone the repository and install the necessary Node.js packages:
-```sh
-# Clone the repository (if you haven't already)
-# git clone https://github.com/roelven/luxtronik-logger.git
+### Generating a CSV Manually
 
-cd luxtronik-logger
-npm install
+You can manually trigger a CSV generation from the cached data by running:
+
+```bash
+python3 src/logger_daemon.py generate
 ```
 
-### 3. Configure Environment Variables
-
-The script is configured using environment variables. You can set these in your `crontab` file.
-
--   `LUXTRONIK_IP`: The IP address of your heat pump.
--   `LUXTRONIK_PORT`: The port for the controller (defaults to `8889`).
-
-### 4. Schedule with Cron
-
-Use `crontab -e` to set up the automated jobs.
-
-**Note:** Replace `/path/to/luxtronik-logger` with the absolute path to where you cloned the project.
-
-```sh
-# Edit your crontab with: crontab -e
-
-# Run the data logger every 5 minutes
-*/5 * * * * cd /path/to/luxtronik-logger && export LUXTRONIK_IP=192.168.20.180 && /usr/bin/node src/index.js
-
-# Run the daily rollup at 5 minutes past midnight
-5 0 * * * cd /path/to/luxtronik-logger && /usr/bin/node src/rollup.js
-```
+This will create a new CSV file in the `data` directory and clear the cache.
