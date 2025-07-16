@@ -7,13 +7,15 @@ import schedule
 import sys
 import time
 from datetime import datetime
-from luxtronik import Luxtronik
+from luxtronik import Luxtronik, discover, discover
+
+load_dotenv()
 
 # --- Configuration ---
-HOST = "192.168.20.180"
-PORT = 8889
-LOG_INTERVAL_SECONDS = 30  # 30 seconds
-CSV_GENERATION_TIME = "07:00" # 7 AM
+HOST = os.getenv("HOST")
+PORT = int(os.getenv("PORT", 8889))
+LOG_INTERVAL_SECONDS = int(os.getenv("LOG_INTERVAL_SECONDS", 30))
+CSV_GENERATION_TIME = os.getenv("CSV_GENERATION_TIME", "07:00")
 DATA_DIR = "data"
 LOG_FILE = os.path.join(DATA_DIR, "daemon.log")
 CACHE_FILE = os.path.join(DATA_DIR, "datalog.jsonl")
@@ -50,8 +52,22 @@ def load_cache():
 def collect_data():
     """Connects to the heat pump, fetches data, and appends it to the cache file."""
     try:
-        logging.info(f"Collecting data...")
-        pump = Luxtronik(HOST, PORT)
+        host = HOST
+        if not host:
+            logging.info("HOST not set, trying to discover heat pump...")
+            try:
+                pumps = discover()
+                if not pumps:
+                    logging.error("Discovery failed. No heat pump found on the network.")
+                    return
+                host = pumps[0][0]  # Use the first discovered pump's IP
+                logging.info(f"Discovered heat pump at {host}")
+            except Exception as e:
+                logging.error(f"An error occurred during discovery: {e}")
+                return
+
+        logging.info(f"Collecting data from {host}:{PORT}...")
+        pump = Luxtronik(host, PORT)
         pump.read()
 
         # Combine all data into a single record

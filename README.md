@@ -23,11 +23,11 @@ This project provides a Python-based data logger for Luxtronik-controlled heat p
     ```
 
 3.  **Configure the logger:**
-    -   Open `src/logger_daemon.py` and edit the following parameters if needed:
-        -   `HOST`: The IP address of your heat pump.
-        -   `PORT`: The port of your heat pump (usually 8889).
-        -   `LOG_INTERVAL_SECONDS`: The interval in seconds at which to log data.
-        -   `CSV_GENERATION_TIME`: The time of day to generate the daily CSV file.
+    -   Copy the sample environment file:
+        ```bash
+        cp .env.sample .env
+        ```
+    -   Open the `.env` file and edit the variables. If you don't provide a `HOST`, the script will attempt to discover the heat pump on your network.
 
 4.  **Configure the data mapping:**
     -   The `config/header-mapping-int.json` file maps the integer keys from the `python-luxtronik` library to the headers in the output CSV file. You can edit this file to add or change mappings.
