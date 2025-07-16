@@ -27,7 +27,7 @@ This project provides a Python-based data logger for Luxtronik-controlled heat p
         ```bash
         cp .env.sample .env
         ```
-    -   Open the `.env` file and edit the variables. If you don't provide a `HOST`, the script will attempt to discover the heat pump on your network.
+    -   Open the `.env` file and edit the `HOST` variable to your heat pump's IP address.
 
 4.  **Configure the data mapping:**
     -   The `config/header-mapping-int.json` file maps the integer keys from the `python-luxtronik` library to the headers in the output CSV file. You can edit this file to add or change mappings.

@@ -5,9 +5,12 @@ import logging
 import os
 import schedule
 import sys
+import os
+import sys
 import time
 from datetime import datetime
-from luxtronik import Luxtronik, discover
+from dotenv import load_dotenv
+from luxtronik import Luxtronik
 
 load_dotenv()
 
@@ -52,22 +55,8 @@ def load_cache():
 def collect_data():
     """Connects to the heat pump, fetches data, and appends it to the cache file."""
     try:
-        host = HOST
-        if not host:
-            logging.info("HOST not set, trying to discover heat pump...")
-            try:
-                pumps = discover()
-                if not pumps:
-                    logging.error("Discovery failed. No heat pump found on the network.")
-                    return
-                host = pumps[0][0]  # Use the first discovered pump's IP
-                logging.info(f"Discovered heat pump at {host}")
-            except Exception as e:
-                logging.error(f"An error occurred during discovery: {e}")
-                return
-
-        logging.info(f"Collecting data from {host}:{PORT}...")
-        pump = Luxtronik(host, PORT)
+        logging.info(f"Collecting data from {HOST}:{PORT}...")
+        pump = Luxtronik(HOST, PORT)
         pump.read()
 
         # Combine all data into a single record
@@ -156,6 +145,10 @@ def generate_csv():
 def main():
     """Main application loop."""
     logging.info("Starting Luxtronik Logger Daemon...")
+
+    if not HOST:
+        logging.error("HOST environment variable not set. Please configure it in your .env file.")
+        sys.exit(1)
     
     # Ensure data directory exists
     if not os.path.exists(DATA_DIR):
