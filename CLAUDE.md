@@ -2,32 +2,91 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+The goal is to build a resilient, fully-automated data-logging service for a Novelan heat pump using python-luxtronik. Key features:
+- Continuous polling (30s default interval)
+- Crash-safe time-series storage (buffer + cache)
+- Daily/weekly CSV roll-ups
+- Dockerized deployment
+- TDD-first development (≥90% coverage)
+
 ## Common Commands
 
 - Run tests: `pytest --timeout=10`
-- Run a specific test: `pytest tests/test_<module>.py --timeout=10`
-- Build Docker image: `docker build -t lux-logger .`
-- Run Docker container: `docker run --env-file .env -v ./logs:/app/logs lux-logger`
+- Run specific test: `pytest tests/test_<module>.py --timeout=10`
+- Build Docker: `docker build -t lux-logger .`
+- Run container: `docker run --env-file .env -v ./logs:/app/logs lux-logger`
 
-## High-Level Architecture
+## Core Architecture
 
-- **Core Modules**:
-  - `config.py`: Loads YAML/ENV config with validation
-  - `client.py`: Interfaces with python-luxtronik for sensor data
-  - `storage.py`: Manages in-memory buffer + on-disk cache
-  - `csvgen.py`: Generates daily/weekly CSV roll-ups
-  - `service.py`: Main scheduler and service loop
+### Modules
+- `config.py`: YAML/ENV config with validation
+- `client.py`: Heat pump interface (python-luxtronik)
+- `storage.py`: Buffer + cache management
+- `csvgen.py`: CSV roll-up generation
+- `service.py`: Main scheduler
 
-- **Data Flow**:
-  - Poll heat pump (60s timeout + auto-retry) → Store in buffer → Flush to cache → Generate CSVs (with crash recovery)
-  - Automatic deletion of CSVs >30d old
+### Data Flow
+1. Poll heat pump (60s timeout, 3 retries)
+2. Store in buffer → flush to cache
+3. Generate CSVs (daily @ 07:00, weekly)
+4. Auto-delete CSVs >30d old
 
-- **Key Dependencies**:
-  - `python-luxtronik` for heat pump communication
-  - `APScheduler` or `sched` for polling intervals
-  - SQLite/JSON for data persistence
+### Key Dependencies
+- python-luxtronik
+- APScheduler/sched
+- SQLite/JSON
 
-## Resilience Rules
-- **Crash Recovery**: Auto-restart service loop on uncaught exceptions
-- **Network Timeouts**: 60s timeout for heat pump communication with exponential backoff
-- **Disk Management**: Auto-delete CSVs >30d old, ensure disk space never exceeds 90% utilization
+## Resilience Specifications
+
+### Network
+- 60s timeout with exponential back-off (3 retries)
+- Detailed timeout logging (attempts + final failure)
+
+### Crash Recovery
+- Auto-restart service loop (5s delay)
+- Preserve CSV generation state
+- One retry on CSV failures
+
+### File Management
+- Auto-delete CSVs >30d (configurable)
+- Log deletions (count + freed space)
+- Disk space monitoring (<90% utilization)
+
+### Testing
+- 10s timeout enforcement in CI
+- Detailed timeout reports
+
+## Implementation Details
+
+### Configuration
+- Fields: HOST, PORT, INTERVAL_SEC, CSV_TIME, CACHE_PATH, OUTPUT_DIRS
+- Validation: types/ranges, exit on invalid
+
+### Client
+- get_all_sensors() → Dict[str, float]
+- Timeout logging with full context
+
+### Storage
+- API: add(timestamp, data) & query(start, end)
+- SIGTERM/SIGINT handling (flush before exit)
+
+### Service
+- APScheduler/sched for intervals
+- Graceful shutdown handlers
+- Uncaught exception logging
+
+### CSV Generation
+- Daily: YYYY-MM-DD_daily.csv (last 24h)
+- Weekly: YYYY-MM-DD_weekly.csv (last 7d)
+- Skip if no data (log warning)
+
+## Future Roadmap
+- 365-day retention (SQLite)
+- Selective exports (sensor filtering)
+- Web UI (FastAPI + React/Dash)
+- Multi-format exports (JSON, DTA)
+
+## Resources
+- python-luxtronik: https://github.com/Bouni/python-luxtronik.git
