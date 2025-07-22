@@ -1,0 +1,3 @@
+[submodule "python-luxtronik"]
+	path = python-luxtronik
+	url = https://github.com/Bouni/python-luxtronik.git
