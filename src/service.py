@@ -76,6 +76,7 @@ class LuxLoggerService:
             self.logger.debug(f"Stored {len(sensor_data)} sensor readings")
         except Exception as e:
             self.logger.error(f"Failed to poll sensors: {str(e)}")
+            raise
         
     def _generate_reports(self) -> None:
         """Generate daily and weekly reports"""

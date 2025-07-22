@@ -58,6 +58,10 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - 10s timeout enforcement in CI
 - Detailed timeout reports
 
+### Job Execution
+- Ensure polling jobs do not skip due to max_instances limit
+- Add timeout handling for long-running jobs
+
 ## Implementation Details
 
 ### Configuration
