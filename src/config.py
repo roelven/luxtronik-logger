@@ -33,6 +33,18 @@ class Config:
                 "daily": str(config["OUTPUT_DIRS_DAILY"]),
                 "weekly": str(config["OUTPUT_DIRS_WEEKLY"])
             }
+        # Also support the old OUTPUT_DIRS format for backward compatibility
+        elif "OUTPUT_DIRS" in config:
+            import json
+            try:
+                dirs = json.loads(config["OUTPUT_DIRS"])
+                if "daily" in dirs and "weekly" in dirs:
+                    self.output_dirs = {
+                        "daily": str(dirs["daily"]),
+                        "weekly": str(dirs["weekly"])
+                    }
+            except:
+                pass  # Ignore invalid JSON
 
     def _validate(self) -> None:
         """Validate configuration values"""

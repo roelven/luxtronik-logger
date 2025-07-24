@@ -8,7 +8,12 @@ from typing import Dict
 class LuxLoggerService:
     def __init__(self, config):
         self.config = config
-        self.scheduler = BackgroundScheduler()
+        # Configure scheduler with proper job handling
+        self.scheduler = BackgroundScheduler({
+            'apscheduler.job_defaults.coalesce': 'true',
+            'apscheduler.job_defaults.max_instances': '3',
+            'apscheduler.job_defaults.misfire_grace_time': '30'
+        })
         self.logger = logging.getLogger(__name__)
         self._setup_signal_handlers()
         
@@ -25,12 +30,15 @@ class LuxLoggerService:
     def start(self) -> None:
         """Start the service and scheduler"""
         try:
-            # Setup polling job
+            # Setup polling job with proper configuration to prevent blocking
             self.scheduler.add_job(
                 self._poll_sensors,
                 'interval',
                 seconds=self.config.interval_sec,
-                max_instances=1
+                max_instances=1,
+                coalesce=True,
+                misfire_grace_time=30,
+                id='poll_sensors_job'
             )
             
             # Setup daily CSV generation
@@ -40,7 +48,10 @@ class LuxLoggerService:
                 'cron',
                 hour=csv_time[0],
                 minute=csv_time[1],
-                max_instances=1
+                max_instances=1,
+                coalesce=True,
+                misfire_grace_time=300,
+                id='generate_reports_job'
             )
             
             self.scheduler.start()
@@ -73,10 +84,11 @@ class LuxLoggerService:
             sensor_data = client.get_all_sensors()
             storage.add(datetime.now(), sensor_data)
             storage.flush()
-            self.logger.debug(f"Stored {len(sensor_data)} sensor readings")
+            self.logger.info(f"Stored {len(sensor_data)} sensor readings")
         except Exception as e:
             self.logger.error(f"Failed to poll sensors: {str(e)}")
-            raise
+            # Don't raise the exception to prevent job from crashing the scheduler
+            # The retry logic is handled in the client
         
     def _generate_reports(self) -> None:
         """Generate daily and weekly reports"""

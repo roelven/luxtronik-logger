@@ -20,17 +20,21 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
+# Install luxtronik from submodule to ensure correct version
+RUN pip uninstall -y luxtronik && pip install -e ./python-luxtronik
+
 # Create data and logs directories
 RUN mkdir -p /app/data/daily /app/data/weekly /app/logs
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1
-ENV HOST=""
-ENV PORT=8888
+ENV HOST="192.168.20.180"
+ENV PORT=8889
 ENV INTERVAL_SEC=30
 ENV CSV_TIME="07:00"
 ENV CACHE_PATH="/app/data/cache.db"
-ENV OUTPUT_DIRS='{"daily": "/app/data/daily", "weekly": "/app/data/weekly"}'
+ENV OUTPUT_DIRS_DAILY="/app/data/daily"
+ENV OUTPUT_DIRS_WEEKLY="/app/data/weekly"
 
 # Run the application
 CMD ["python", "main.py"]
