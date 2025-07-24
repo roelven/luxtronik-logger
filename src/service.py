@@ -9,11 +9,7 @@ class LuxLoggerService:
     def __init__(self, config):
         self.config = config
         # Configure scheduler with proper job handling
-        self.scheduler = BackgroundScheduler({
-            'apscheduler.job_defaults.coalesce': 'true',
-            'apscheduler.job_defaults.max_instances': '3',
-            'apscheduler.job_defaults.misfire_grace_time': '30'
-        })
+        self.scheduler = BackgroundScheduler()
         self.logger = logging.getLogger(__name__)
         self._setup_signal_handlers()
         
@@ -35,7 +31,7 @@ class LuxLoggerService:
                 self._poll_sensors,
                 'interval',
                 seconds=self.config.interval_sec,
-                max_instances=1,
+                max_instances=3,
                 coalesce=True,
                 misfire_grace_time=30,
                 id='poll_sensors_job'
@@ -54,8 +50,18 @@ class LuxLoggerService:
                 id='generate_reports_job'
             )
             
+            # Configure default job settings
+            self.scheduler._configure(
+                job_defaults={
+                    'coalesce': True,
+                    'max_instances': 3,
+                    'misfire_grace_time': 30
+                }
+            )
+            
             self.scheduler.start()
             self.logger.info("Service started")
+            self.logger.info(f"Scheduler config: {self.scheduler._job_defaults}")
             
             # Keep main thread alive
             while True:
@@ -72,7 +78,7 @@ class LuxLoggerService:
     
     def _poll_sensors(self) -> None:
         """Poll heat pump sensors and store data"""
-        self.logger.debug("Polling sensors")
+        self.logger.info("Polling sensors - job started")
         
         from src.client import HeatPumpClient
         from src.storage import DataStorage
@@ -84,11 +90,12 @@ class LuxLoggerService:
             sensor_data = client.get_all_sensors()
             storage.add(datetime.now(), sensor_data)
             storage.flush()
-            self.logger.info(f"Stored {len(sensor_data)} sensor readings")
+            self.logger.info(f"Stored {len(sensor_data)} sensor readings - job completed")
         except Exception as e:
             self.logger.error(f"Failed to poll sensors: {str(e)}")
             # Don't raise the exception to prevent job from crashing the scheduler
             # The retry logic is handled in the client
+            self.logger.info("Polling job completed with errors")
         
     def _generate_reports(self) -> None:
         """Generate daily and weekly reports"""

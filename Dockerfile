@@ -4,11 +4,14 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including networking tools for debugging
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
     git \
+    telnet \
+    netcat-openbsd \
+    iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
