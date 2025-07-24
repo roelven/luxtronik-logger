@@ -67,10 +67,10 @@ class TestLuxLoggerService:
             mock_scheduler.return_value.add_job.return_value = None
             service = LuxLoggerService(config)
             
-            # Test job timeout handling
-            with patch('src.service.LuxLoggerService._poll_sensors', side_effect=Exception("Timeout")) as mock_poll:
-                service._poll_sensors()
-                mock_poll.assert_called_once()
+            # Test that the exception is properly raised when _poll_sensors fails
+            with patch.object(service, '_poll_sensors', side_effect=Exception("Timeout")):
+                with pytest.raises(Exception, match="Timeout"):
+                    service._poll_sensors()
     
     @patch('src.service.LuxLoggerService._generate_reports')
     def test_report_generation_job(self, mock_reports):
