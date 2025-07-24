@@ -29,6 +29,9 @@ RUN pip uninstall -y luxtronik && pip install -e ./python-luxtronik
 # Create data and logs directories
 RUN mkdir -p /app/data/daily /app/data/weekly /app/logs
 
+# Make entrypoint script executable
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 ENV HOST="192.168.20.180"
@@ -39,5 +42,5 @@ ENV CACHE_PATH="/app/data/cache.db"
 ENV OUTPUT_DIRS_DAILY="/app/data/daily"
 ENV OUTPUT_DIRS_WEEKLY="/app/data/weekly"
 
-# Run the application
-CMD ["python", "main.py"]
+# Use entrypoint script to add routing
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
