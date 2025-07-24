@@ -50,14 +50,8 @@ class LuxLoggerService:
                 id='generate_reports_job'
             )
             
-            # Configure default job settings
-            self.scheduler._configure(
-                job_defaults={
-                    'coalesce': True,
-                    'max_instances': 3,
-                    'misfire_grace_time': 30
-                }
-            )
+            # The scheduler is already configured with default job settings
+            # through the constructor configuration, so we don't need to call _configure
             
             self.scheduler.start()
             self.logger.info("Service started")
