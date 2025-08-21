@@ -11,18 +11,27 @@ class LuxLoggerService:
         # Configure scheduler with proper job handling
         self.scheduler = BackgroundScheduler()
         self.logger = logging.getLogger(__name__)
+        self.storage = None  # Will be initialized in _poll_sensors
         self._setup_signal_handlers()
-        
+
     def _setup_signal_handlers(self) -> None:
         """Register signal handlers for graceful shutdown"""
         signal.signal(signal.SIGINT, self._handle_shutdown)
         signal.signal(signal.SIGTERM, self._handle_shutdown)
-    
+
     def _handle_shutdown(self, signum, frame) -> None:
         """Handle shutdown signals"""
-        self.logger.info("Shutdown signal received")
+        self.logger.info(f"Shutdown signal {signum} received")
+        # Flush any buffered data before shutting down
+        if self.storage and self.storage.buffer:
+            self.logger.info(f"Flushing {len(self.storage.buffer)} buffered data points before shutdown")
+            try:
+                self.storage.flush()
+                self.logger.info("Buffer flushed successfully before shutdown")
+            except Exception as e:
+                self.logger.error(f"Failed to flush buffer before shutdown: {str(e)}")
         self.stop()
-    
+
     def start(self) -> None:
         """Start the service and scheduler"""
         try:
@@ -36,7 +45,7 @@ class LuxLoggerService:
                 misfire_grace_time=30,
                 id='poll_sensors_job'
             )
-            
+
             # Setup daily CSV generation
             csv_time = [int(x) for x in self.config.csv_time.split(':')]
             self.scheduler.add_job(
@@ -49,37 +58,40 @@ class LuxLoggerService:
                 misfire_grace_time=300,
                 id='generate_reports_job'
             )
-            
+
             # The scheduler is already configured with default job settings
             # through the constructor configuration, so we don't need to call _configure
-            
+
             self.scheduler.start()
             self.logger.info("Service started")
             self.logger.info(f"Scheduler config: {self.scheduler._job_defaults}")
-            
+
             # Keep main thread alive
             while True:
                 time.sleep(1)
-                
+
         except Exception as e:
             self.logger.error(f"Service failed: {str(e)}")
             raise
-    
+
     def stop(self) -> None:
         """Stop the service gracefully"""
         self.logger.info("Stopping service")
         self.scheduler.shutdown()
-    
+
     def _poll_sensors(self) -> None:
         """Poll heat pump sensors and store data"""
         self.logger.info("Polling sensors - job started")
-        
+
         from src.client import HeatPumpClient
         from src.storage import DataStorage
-        
+
         client = HeatPumpClient(self.config.host, self.config.port)
-        storage = DataStorage(self.config.cache_path)
-        
+        # Store reference to storage for shutdown handling
+        if self.storage is None:
+            self.storage = DataStorage(self.config.cache_path)
+        storage = self.storage
+
         try:
             sensor_data = client.get_all_sensors()
             storage.add(datetime.now(), sensor_data)
@@ -90,7 +102,7 @@ class LuxLoggerService:
             # Don't raise the exception to prevent job from crashing the scheduler
             # The retry logic is handled in the client
             self.logger.info("Polling job completed with errors")
-        
+
     def _generate_reports(self) -> None:
         """Generate daily and weekly reports"""
         self.logger.info("Generating reports")
