@@ -31,6 +31,11 @@ A resilient, fully-automated data-logging service for Novelan heat pumps using `
    # Add route on the host before running
    sudo ip route add 192.168.20.0/24 via 10.0.0.1 dev ens18
    
+   # For virtualized environments (LXD/LXC), you may also need:
+   sudo sysctl -w net.ipv4.conf.all.rp_filter=0
+   sudo sysctl -w net.ipv4.conf.ens18.rp_filter=0
+   sudo sysctl -w net.ipv4.ip_forward=1
+   
    # Run with host networking mode
    docker run --network=host --env-file .env -v ./logs:/app/logs lux-logger
    ```
