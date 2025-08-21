@@ -67,6 +67,11 @@ class LuxLoggerService:
             self.logger.info("Service started")
             self.logger.info(f"Scheduler config: {self.scheduler._job_defaults}")
 
+            # Log job details
+            jobs = self.scheduler.get_jobs()
+            for job in jobs:
+                self.logger.info(f"Job scheduled: {job.id} - {job.trigger}")
+
             # Keep main thread alive
             while True:
                 time.sleep(1)
@@ -83,6 +88,7 @@ class LuxLoggerService:
     def _poll_sensors(self) -> None:
         """Poll heat pump sensors and store data"""
         self.logger.info("Polling sensors - job started")
+        job_start_time = datetime.now()
 
         from src.client import HeatPumpClient
         from src.storage import DataStorage
@@ -108,15 +114,19 @@ class LuxLoggerService:
             storage.add(datetime.now(), sensor_data)
             storage.flush()
             self.logger.info(f"Stored {len(sensor_data)} sensor readings - job completed")
+            job_duration = datetime.now() - job_start_time
+            self.logger.info(f"Polling job completed successfully in {job_duration.total_seconds():.2f}s")
         except Exception as e:
             self.logger.error(f"Failed to poll sensors: {str(e)}")
             # Don't raise the exception to prevent job from crashing the scheduler
             # The retry logic is handled in the client
-            self.logger.info("Polling job completed with errors")
+            job_duration = datetime.now() - job_start_time
+            self.logger.info(f"Polling job completed with errors in {job_duration.total_seconds():.2f}s")
 
     def _generate_reports(self) -> None:
         """Generate daily and weekly reports"""
         self.logger.info("Generating reports")
+        job_start_time = datetime.now()
 
         from src.storage import DataStorage
         from src.csvgen import CSVGenerator
@@ -177,4 +187,5 @@ class LuxLoggerService:
         except Exception as e:
             self.logger.error(f"Failed to generate weekly CSV: {str(e)}")
 
-        self.logger.info("Report generation completed")
+        job_duration = datetime.now() - job_start_time
+        self.logger.info(f"Report generation completed in {job_duration.total_seconds():.2f}s")
