@@ -2,7 +2,7 @@ import time
 import signal
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime, time as dtime
+from datetime import datetime, time as dtime, timedelta
 from typing import Dict
 
 class LuxLoggerService:
@@ -141,4 +141,40 @@ class LuxLoggerService:
         except Exception as e:
             self.logger.error(f"CSV cleanup failed: {str(e)}")
 
-        # Implementation will use storage and csvgen components for report generation
+        # Generate daily report (last 24 hours)
+        try:
+            end_time = datetime.now()
+            start_time = end_time - timedelta(days=1)
+
+            if self.storage is None:
+                self.storage = DataStorage(self.config.cache_path)
+
+            daily_data = self.storage.query(start_time, end_time)
+
+            if daily_data:
+                daily_file = self.csvgen.generate_daily_csv(daily_data, end_time)
+                self.logger.info(f"Generated daily CSV: {daily_file} with {len(daily_data)} data points")
+            else:
+                self.logger.warning("No data available for daily CSV generation")
+        except Exception as e:
+            self.logger.error(f"Failed to generate daily CSV: {str(e)}")
+
+        # Generate weekly report (last 7 days)
+        try:
+            end_time = datetime.now()
+            start_time = end_time - timedelta(days=7)
+
+            if self.storage is None:
+                self.storage = DataStorage(self.config.cache_path)
+
+            weekly_data = self.storage.query(start_time, end_time)
+
+            if weekly_data:
+                weekly_file = self.csvgen.generate_weekly_csv(weekly_data, end_time)
+                self.logger.info(f"Generated weekly CSV: {weekly_file} with {len(weekly_data)} data points")
+            else:
+                self.logger.warning("No data available for weekly CSV generation")
+        except Exception as e:
+            self.logger.error(f"Failed to generate weekly CSV: {str(e)}")
+
+        self.logger.info("Report generation completed")
