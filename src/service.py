@@ -86,6 +86,16 @@ class LuxLoggerService:
 
         from src.client import HeatPumpClient
         from src.storage import DataStorage
+        from src.utils import check_disk_usage
+
+        # Check disk space before polling
+        try:
+            paths_to_check = [self.config.cache_path] + list(self.config.output_dirs.values())
+            exceeding_paths = check_disk_usage(paths_to_check, self.config.disk_usage_threshold, self.logger)
+            if exceeding_paths:
+                self.logger.warning(f"Disk usage threshold exceeded for {len(exceeding_paths)} paths before polling")
+        except Exception as e:
+            self.logger.error(f"Disk usage check failed before polling: {str(e)}")
 
         client = HeatPumpClient(self.config.host, self.config.port)
         # Store reference to storage for shutdown handling
@@ -110,6 +120,16 @@ class LuxLoggerService:
 
         from src.storage import DataStorage
         from src.csvgen import CSVGenerator
+        from src.utils import check_disk_usage
+
+        # Check disk space before generating reports
+        try:
+            paths_to_check = [self.config.cache_path] + list(self.config.output_dirs.values())
+            exceeding_paths = check_disk_usage(paths_to_check, self.config.disk_usage_threshold, self.logger)
+            if exceeding_paths:
+                self.logger.warning(f"Disk usage threshold exceeded for {len(exceeding_paths)} paths")
+        except Exception as e:
+            self.logger.error(f"Disk usage check failed: {str(e)}")
 
         # Initialize csvgen if not already done
         if self.csvgen is None:
