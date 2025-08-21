@@ -18,6 +18,8 @@ class CSVGenerator:
 
     def cleanup_old_csvs(self, retention_days: int) -> None:
         """Delete CSV files older than retention_days"""
+        self.logger.debug(f"Starting CSV cleanup with {retention_days} day retention")
+
         if retention_days < 1:
             self.logger.warning("CSV retention days must be >= 1, skipping cleanup")
             return
@@ -27,12 +29,16 @@ class CSVGenerator:
         total_freed_bytes = 0
 
         for dir_type, dir_path in self.output_dirs.items():
+            self.logger.debug(f"Processing {dir_type} directory: {dir_path}")
+
             if not os.path.exists(dir_path):
+                self.logger.warning(f"Directory does not exist, skipping: {dir_path}")
                 continue
 
             # Find all CSV files in the directory
             csv_pattern = os.path.join(dir_path, "*.csv")
             csv_files = glob.glob(csv_pattern)
+            self.logger.debug(f"Found {len(csv_files)} CSV files in {dir_path}")
 
             for file_path in csv_files:
                 try:
@@ -46,9 +52,11 @@ class CSVGenerator:
                         deleted_count += 1
                         total_freed_bytes += file_size
                         self.logger.info(f"Deleted old {dir_type} CSV: {os.path.basename(file_path)} "
-                                       f"(modified: {file_mtime.strftime('%Y-%m-%d %H:%M:%S')})")
+                                       f"(modified: {file_mtime.strftime('%Y-%m-%d %H:%M:%S')}, "
+                                       f"size: {file_size} bytes)")
                 except Exception as e:
                     self.logger.warning(f"Failed to process {file_path} for cleanup: {str(e)}")
+                    self.logger.warning(f"Error type: {type(e).__name__}")
 
         if deleted_count > 0:
             # Convert bytes to MB for readable logging
@@ -75,6 +83,8 @@ class CSVGenerator:
 
     def _write_csv(self, filepath: str, data: List[Dict]) -> None:
         """Write data to CSV file with headers"""
+        self.logger.debug(f"Writing CSV file: {filepath} with {len(data)} data points")
+
         if not data:
             self.logger.warning(f"No data to write to {filepath}")
             return
@@ -83,8 +93,12 @@ class CSVGenerator:
             with open(filepath, 'w', newline='') as f:
                 writer = csv.DictWriter(f, fieldnames=data[0]["data"].keys())
                 writer.writeheader()
+                row_count = 0
                 for point in data:
                     writer.writerow(point["data"])
+                    row_count += 1
+            self.logger.info(f"Successfully wrote CSV file: {filepath} with {row_count} rows")
         except Exception as e:
-            self.logger.error(f"Failed to write CSV: {str(e)}")
+            self.logger.error(f"Failed to write CSV file {filepath}: {str(e)}")
+            self.logger.error(f"Error type: {type(e).__name__}")
             raise
