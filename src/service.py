@@ -12,6 +12,7 @@ class LuxLoggerService:
         self.scheduler = BackgroundScheduler()
         self.logger = logging.getLogger(__name__)
         self.storage = None  # Will be initialized in _poll_sensors
+        self.csvgen = None  # Will be initialized in _generate_reports
         self._setup_signal_handlers()
 
     def _setup_signal_handlers(self) -> None:
@@ -46,7 +47,7 @@ class LuxLoggerService:
                 id='poll_sensors_job'
             )
 
-            # Setup daily CSV generation
+            # Setup daily CSV generation and cleanup
             csv_time = [int(x) for x in self.config.csv_time.split(':')]
             self.scheduler.add_job(
                 self._generate_reports,
@@ -106,4 +107,18 @@ class LuxLoggerService:
     def _generate_reports(self) -> None:
         """Generate daily and weekly reports"""
         self.logger.info("Generating reports")
-        # Implementation will use storage and csvgen components
+
+        from src.storage import DataStorage
+        from src.csvgen import CSVGenerator
+
+        # Initialize csvgen if not already done
+        if self.csvgen is None:
+            self.csvgen = CSVGenerator(self.config.output_dirs)
+
+        # Run cleanup first
+        try:
+            self.csvgen.cleanup_old_csvs(self.config.csv_retention_days)
+        except Exception as e:
+            self.logger.error(f"CSV cleanup failed: {str(e)}")
+
+        # Implementation will use storage and csvgen components for report generation
