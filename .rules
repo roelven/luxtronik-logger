@@ -14,6 +14,13 @@
 - Search for existing types/interfaces before creating new ones
 - Include all imports and proper naming
 - Every implementation must be carefully thought through
+- Every git commit requires a clear summary of the changes. Append every message with the following text:
+
+```
+🤖 Generated with [Codestral 2508](https://openrouter.ai/mistralai/codestral-2508) using [Zed](https://zed.dev/)
+
+Co-Authored-By: Codestral <noreply@mistral.ai>
+```.
 
 ### File Constraints
 - **200-300 LINE LIMIT**: Refactor any file exceeding 300 lines
