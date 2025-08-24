@@ -110,5 +110,20 @@ This will create the same daily and weekly CSV files as the scheduled job, using
 
 This is useful for generating reports at specific times or for debugging purposes.
 
+## Testing CSV Data Generation
+To test the CSV data generation with a mock heat pump:
+
+```bash
+# Run the comprehensive test with mock heat pump
+python comprehensive_test.py
+```
+
+This test will:
+1. Start a mock heat pump server
+2. Build and run the Docker container
+3. Wait for data collection (70 seconds for multiple data points)
+4. Execute on-demand report generation
+5. Validate the generated CSV files
+
 ## Resources
 - python-luxtronik: https://github.com/Bouni/python-luxtronik.git

@@ -73,6 +73,21 @@ Copy `.env.sample` to `.env` and configure:
 ## Debugging and Testing
 - **Timeout for Debugging**: Add a timeout parameter to the service to run for a specified duration (e.g., 63 seconds) and exit. This allows for quick debugging sessions where the output can be observed in the terminal. The existing 10-second timeouts for unit tests remain unchanged.
 
+## Testing CSV Data Generation
+To test the CSV data generation with a mock heat pump:
+
+```bash
+# Run the comprehensive test with mock heat pump
+python comprehensive_test.py
+```
+
+This test will:
+1. Start a mock heat pump server
+2. Build and run the Docker container
+3. Wait for data collection (70 seconds for multiple data points)
+4. Execute on-demand report generation
+5. Validate the generated CSV files
+
 ## On-Demand Report Generation
 To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:
 
