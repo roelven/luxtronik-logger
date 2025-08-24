@@ -194,3 +194,70 @@ class LuxLoggerService:
 
         job_duration = datetime.now() - job_start_time
         self.logger.info(f"Report generation completed in {job_duration.total_seconds():.2f}s")
+
+    def generate_reports_on_demand(self) -> None:
+        """Generate daily and weekly reports on demand (not scheduled)"""
+        self.logger.info("Generating on-demand reports")
+        job_start_time = datetime.now()
+
+        from src.storage import DataStorage
+        from src.csvgen import CSVGenerator
+        from src.utils import check_disk_usage
+
+        # Check disk space before generating reports
+        try:
+            paths_to_check = [self.config.cache_path] + list(self.config.output_dirs.values())
+            exceeding_paths = check_disk_usage(paths_to_check, self.config.disk_usage_threshold, self.logger)
+            if exceeding_paths:
+                self.logger.warning(f"Disk usage threshold exceeded for {len(exceeding_paths)} paths")
+        except Exception as e:
+            self.logger.error(f"Disk usage check failed: {str(e)}")
+
+        # Initialize csvgen if not already done
+        if self.csvgen is None:
+            self.csvgen = CSVGenerator(self.config.output_dirs)
+
+        # Run cleanup first
+        try:
+            self.csvgen.cleanup_old_csvs(self.config.csv_retention_days)
+        except Exception as e:
+            self.logger.error(f"CSV cleanup failed: {str(e)}")
+
+        # Generate daily report (last 24 hours)
+        try:
+            end_time = datetime.now()
+            start_time = end_time - timedelta(days=1)
+
+            if self.storage is None:
+                self.storage = DataStorage(self.config.cache_path)
+
+            daily_data = self.storage.query(start_time, end_time)
+
+            if daily_data:
+                daily_file = self.csvgen.generate_daily_csv(daily_data, end_time)
+                self.logger.info(f"Generated daily CSV: {daily_file} with {len(daily_data)} data points")
+            else:
+                self.logger.warning("No data available for daily CSV generation")
+        except Exception as e:
+            self.logger.error(f"Failed to generate daily CSV: {str(e)}")
+
+        # Generate weekly report (last 7 days)
+        try:
+            end_time = datetime.now()
+            start_time = end_time - timedelta(days=7)
+
+            if self.storage is None:
+                self.storage = DataStorage(self.config.cache_path)
+
+            weekly_data = self.storage.query(start_time, end_time)
+
+            if weekly_data:
+                weekly_file = self.csvgen.generate_weekly_csv(weekly_data, end_time)
+                self.logger.info(f"Generated weekly CSV: {weekly_file} with {len(weekly_data)} data points")
+            else:
+                self.logger.warning("No data available for weekly CSV generation")
+        except Exception as e:
+            self.logger.error(f"Failed to generate weekly CSV: {str(e)}")
+
+        job_duration = datetime.now() - job_start_time
+        self.logger.info(f"On-demand report generation completed in {job_duration.total_seconds():.2f}s")

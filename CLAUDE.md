@@ -80,6 +80,7 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - APScheduler/sched for intervals
 - Graceful shutdown handlers
 - Uncaught exception logging
+- On-demand report generation support
 
 ### CSV Generation
 - Daily: YYYY-MM-DD_daily.csv (last 24h)
@@ -91,6 +92,23 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - Selective exports (sensor filtering)
 - Web UI (FastAPI + React/Dash)
 - Multi-format exports (JSON, DTA)
+
+## On-Demand Report Generation
+To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:
+
+```bash
+# Generate daily and weekly reports on-demand
+python main.py --mode generate-reports
+```
+
+This will create the same daily and weekly CSV files as the scheduled job, using the last 24 hours and 7 days of data respectively. The command will:
+- Query data from the SQLite cache
+- Generate daily CSV with the last 24 hours of data
+- Generate weekly CSV with the last 7 days of data
+- Clean up old CSV files according to retention settings
+- Exit after completion
+
+This is useful for generating reports at specific times or for debugging purposes.
 
 ## Resources
 - python-luxtronik: https://github.com/Bouni/python-luxtronik.git

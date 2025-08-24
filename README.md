@@ -10,6 +10,7 @@ A resilient, fully-automated data-logging service for Novelan heat pumps using `
 - **CSV Roll-Ups**: Generates daily and weekly CSV files for analysis.
 - **Dockerized Deployment**: Easy containerization for seamless operation.
 - **TDD-First**: High test coverage (≥90%) ensures reliability.
+- **On-Demand Reports**: Generate daily/weekly CSV reports at any time.
 
 ## CSV Generation
 - **Daily**: `YYYY-MM-DD_daily.csv` (last 24 hours of data).
@@ -23,21 +24,21 @@ A resilient, fully-automated data-logging service for Novelan heat pumps using `
    ```
 2. **Run**:
    ```bash
-   docker run --env-file .env -v ./logs:/app/logs lux-logger
+   docker run --env-file .env -v ./data:/app/data lux-logger
    ```
-   - Mount a volume for persistent logs (`./logs:/app/logs`).
+   - Mount a volume for persistent logs (`./data:/app/data`).
    - Use `--env-file .env` to pass configuration (refer to `.env.sample` for required variables).
 
    **Important Networking Note**: If your heat pump is on a different subnet (e.g., 192.168.20.0/24) than your Docker host (e.g., 10.0.0.0/24):
    ```bash
    # Add route on the host before running
    sudo ip route add 192.168.20.0/24 via 10.0.0.1 dev ens18
-   
+
    # For virtualized environments (LXD/LXC), you may also need:
    sudo sysctl -w net.ipv4.conf.all.rp_filter=0
    sudo sysctl -w net.ipv4.conf.ens18.rp_filter=0
    sudo sysctl -w net.ipv4.ip_forward=1
-   
+
    # Run with host networking mode
    docker run --network=host --env-file .env -v ./logs:/app/logs lux-logger
    ```
@@ -62,6 +63,7 @@ Copy `.env.sample` to `.env` and configure:
   - `storage.py`: Buffer + cache management.
   - `csvgen.py`: CSV generation.
   - `service.py`: Main scheduler.
+  - `main.py`: Command-line interface with on-demand report generation support.
 
 ## Resilience
 - **Network**: 60s timeout with exponential backoff (3 retries).
@@ -70,6 +72,23 @@ Copy `.env.sample` to `.env` and configure:
 
 ## Debugging and Testing
 - **Timeout for Debugging**: Add a timeout parameter to the service to run for a specified duration (e.g., 63 seconds) and exit. This allows for quick debugging sessions where the output can be observed in the terminal. The existing 10-second timeouts for unit tests remain unchanged.
+
+## On-Demand Report Generation
+To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:
+
+```bash
+# Generate daily and weekly reports on-demand
+python main.py --mode generate-reports
+```
+
+This will create the same daily and weekly CSV files as the scheduled job, using the last 24 hours and 7 days of data respectively. The command will:
+- Query data from the SQLite cache
+- Generate daily CSV with the last 24 hours of data
+- Generate weekly CSV with the last 7 days of data
+- Clean up old CSV files according to retention settings
+- Exit after completion
+
+This is useful for generating reports at specific times or for debugging purposes.
 
 ## Future Roadmap
 - 365-day retention (SQLite).
