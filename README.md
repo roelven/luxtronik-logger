@@ -3,6 +3,8 @@
 A resilient, fully-automated data-logging service for Novelan heat pumps using `python-luxtronik`. Continuously polls the heat pump, stores time-series data safely, and generates daily/weekly CSV roll-ups.
 
 ## Features
+
+**Note**: When running tests, ensure the `PYTHONPATH` environment variable is set to the root directory of the project. This can be done by running `export PYTHONPATH=.` before executing the tests.
 - **Continuous Polling**: Default 30-second interval for real-time data collection.
 - **Crash-Safe Storage**: Buffers and caches data to prevent loss.
 - **CSV Roll-Ups**: Generates daily and weekly CSV files for analysis.
@@ -65,6 +67,9 @@ Copy `.env.sample` to `.env` and configure:
 - **Network**: 60s timeout with exponential backoff (3 retries).
 - **Crash Recovery**: Auto-restarts service loop (5s delay).
 - **Disk Space**: Monitors utilization (<90%) and logs deletions.
+
+## Debugging and Testing
+- **Timeout for Debugging**: Add a timeout parameter to the service to run for a specified duration (e.g., 63 seconds) and exit. This allows for quick debugging sessions where the output can be observed in the terminal. The existing 10-second timeouts for unit tests remain unchanged.
 
 ## Future Roadmap
 - 365-day retention (SQLite).

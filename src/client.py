@@ -41,6 +41,7 @@ class HeatPumpClient:
 
     def get_all_sensors(self) -> Dict[str, float]:
         """Retrieve all sensor readings with error handling"""
+        self.logger.debug("Starting get_all_sensors method")
         if not self.connection:
             if not self.connect():
                 raise ConnectionError("Failed to establish connection to heat pump")
@@ -59,6 +60,9 @@ class HeatPumpClient:
             readings.update(parameters)
             readings.update(visibilities)
 
+            self.logger.debug(f"Retrieved {len(readings)} sensor readings")
+            self.logger.debug(f"Sample data: {dict(list(readings.items())[:3])}")  # Log first 3 items
+
             elapsed = time.time() - start_time
             self.logger.debug(f"Retrieved {len(readings)} sensor readings in {elapsed:.2f}s")
             return readings
@@ -68,4 +72,5 @@ class HeatPumpClient:
             self.logger.error(f"Error type: {type(e).__name__}")
             # Reset connection for next attempt
             self.connection = None
+            self.logger.error(f"Error in get_all_sensors: {str(e)}")
             raise

@@ -6,8 +6,9 @@ from datetime import datetime, time as dtime, timedelta
 from typing import Dict
 
 class LuxLoggerService:
-    def __init__(self, config):
+    def __init__(self, config, timeout=None):
         self.config = config
+        self.timeout = timeout
         # Configure scheduler with proper job handling
         self.scheduler = BackgroundScheduler()
         self.logger = logging.getLogger(__name__)
@@ -72,8 +73,12 @@ class LuxLoggerService:
             for job in jobs:
                 self.logger.info(f"Job scheduled: {job.id} - {job.trigger}")
 
-            # Keep main thread alive
+            # Keep main thread alive with timeout
+            start_time = time.time()
             while True:
+                if self.timeout and (time.time() - start_time) >= self.timeout:
+                    self.logger.info(f"Timeout reached after {self.timeout} seconds")
+                    break
                 time.sleep(1)
 
         except Exception as e:
