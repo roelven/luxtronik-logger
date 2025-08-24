@@ -1,0 +1,35 @@
+### Process Flow
+- **ASK FIRST**: When missing information or context before starting implementation, always ask the user for clarification
+- **TDD SEQUENCE**: Always follow this exact sequence: write test → create code → verify all tests pass → git commit
+- **USE FULL PATHS**: When executing commands, always use full paths, never relative paths. Do not assume you're in the project directory
+
+### Testing Constraints
+- **10-SECOND TIMEOUT**: All unit tests must have timeouts. Test suites must not exceed 10 seconds total runtime
+- **NO STUCK TESTS**: Implement timeouts to prevent AI agent from getting stuck on hanging tests
+
+### Dev Rules
+- Follow requirements to the letter
+- Think step-by-step, describe plan in pseudocode, then confirm before coding
+- Adapt to existing project conventions - read similar code first
+- Search for existing types/interfaces before creating new ones
+- Include all imports and proper naming
+- Every implementation must be carefully thought through
+
+### File Constraints
+- **200-300 LINE LIMIT**: Refactor any file exceeding 300 lines
+- **NO INLINE SCRIPTS**: Never write one-off scripts directly in project files
+
+### Clean Code Mantra
+Write code as if the person maintaining it is a violent psychopath who knows where you live:
+- **NO CLEVER TRICKS**: Clear, obvious code only
+- **COMMENT THE WHY**: Only explain why, never what. Code shows what
+- **MEASURE THEN OPTIMIZE**: No premature optimization
+- **SIMPLICITY FIRST**: Remove everything non-essential
+
+### Refactoring Rules
+- **EDIT DON'T COPY**: Modify existing files directly. Never duplicate files and rename them (e.g., `component-v2.tsx`)
+- **STAY IN SCOPE**: Stay within the defined project scope, do not execute programs outside
+
+### Logging Workflow
+- **ADD DURING DEBUG**: Add logs during implementation/debugging phases
+- **REMOVE WHEN STABLE**: Remove debugging logs once code is working and stable
