@@ -80,7 +80,7 @@ To test CSV generation with pre-populated data:
 
 ```bash
 # Run the CSV generation test with test data
-python test_csv_generation.py
+python tests/test_csv_generation.py
 ```
 
 This test:
@@ -93,7 +93,7 @@ To test CSV generation with your actual heat pump:
 
 ```bash
 # Run the live heat pump test (connects to 192.168.20.180:8889)
-python test_live_heatpump.py
+python tests/test_live_heatpump.py
 ```
 
 This test:
@@ -106,11 +106,11 @@ This test:
 To generate CSV files from your live heat pump and save them permanently:
 
 ```bash
-# Generate CSV files and save to ./heatpump_data directory
-python generate_live_csv.py --output ./heatpump_data
+# Generate CSV files and save to ./output directory
+python generate_live_csv.py --output ./output
 
 # Generate CSV files with custom duration (e.g., 120 seconds)
-python generate_live_csv.py --output ./heatpump_data --duration 120
+python generate_live_csv.py --output ./output --duration 120
 ```
 
 This script:
@@ -125,7 +125,7 @@ To test the full workflow with a mock heat pump:
 
 ```bash
 # Run the comprehensive test with mock heat pump
-python comprehensive_test.py
+python tests/comprehensive_test.py
 ```
 
 This test will:
