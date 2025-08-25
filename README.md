@@ -55,7 +55,15 @@ Copy `.env.sample` to `.env` and configure:
 ## Development
 - **Tests**:
   ```bash
+  export PYTHONPATH=.
   pytest --timeout=10
+  ```
+
+- **Script Execution**:
+  When running scripts directly (e.g., `python main.py`), ensure the `PYTHONPATH` environment variable is set to the root directory:
+  ```bash
+  export PYTHONPATH=.
+  python main.py --mode generate-reports
   ```
 - **Modules**:
   - `config.py`: YAML/ENV config validation.
