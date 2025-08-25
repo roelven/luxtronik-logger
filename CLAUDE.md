@@ -111,7 +111,22 @@ This will create the same daily and weekly CSV files as the scheduled job, using
 This is useful for generating reports at specific times or for debugging purposes.
 
 ## Testing CSV Data Generation
-To test the CSV data generation with a mock heat pump:
+
+### Simple CSV Generation Test
+To test CSV generation with pre-populated data:
+
+```bash
+# Run the CSV generation test with test data
+python test_csv_generation.py
+```
+
+This test:
+1. Creates realistic sensor data in SQLite cache
+2. Generates daily and weekly CSV files
+3. Validates the structure and content of generated CSV files
+
+### Docker-Based Test (Advanced)
+To test the full workflow with a mock heat pump:
 
 ```bash
 # Run the comprehensive test with mock heat pump

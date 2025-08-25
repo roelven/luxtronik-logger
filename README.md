@@ -74,7 +74,22 @@ Copy `.env.sample` to `.env` and configure:
 - **Timeout for Debugging**: Add a timeout parameter to the service to run for a specified duration (e.g., 63 seconds) and exit. This allows for quick debugging sessions where the output can be observed in the terminal. The existing 10-second timeouts for unit tests remain unchanged.
 
 ## Testing CSV Data Generation
-To test the CSV data generation with a mock heat pump:
+
+### Simple CSV Generation Test
+To test CSV generation with pre-populated data:
+
+```bash
+# Run the CSV generation test with test data
+python test_csv_generation.py
+```
+
+This test:
+1. Creates realistic sensor data in SQLite cache
+2. Generates daily and weekly CSV files
+3. Validates the structure and content of generated CSV files
+
+### Docker-Based Test (Advanced)
+To test the full workflow with a mock heat pump:
 
 ```bash
 # Run the comprehensive test with mock heat pump
