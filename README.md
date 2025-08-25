@@ -88,6 +88,20 @@ This test:
 2. Generates daily and weekly CSV files
 3. Validates the structure and content of generated CSV files
 
+### Live Heat Pump Test
+To test CSV generation with your actual heat pump:
+
+```bash
+# Run the live heat pump test (connects to 192.168.20.180:8889)
+python test_live_heatpump.py
+```
+
+This test:
+1. Connects to your live heat pump at 192.168.20.180:8889
+2. Collects real sensor data for 61 seconds (2+ data points)
+3. Generates daily and weekly CSV reports
+4. Validates the structure and content of generated CSV files
+
 ### Docker-Based Test (Advanced)
 To test the full workflow with a mock heat pump:
 
