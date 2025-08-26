@@ -1,13 +1,25 @@
 # Luxtronik Logger
 
-A resilient, fully-automated data-logging service for Novelan heat pumps using `python-luxtronik`. Continuously polls the heat pump, stores time-series data safely, and generates daily/weekly CSV roll-ups.
+A resilient, fully-automated data-logging service for Novelan heat pumps using `python-luxtronik`. Continuously polls the heat pump, stores time-series data safely, and generates daily/weekly CSV roll-ups with comprehensive sensor data.
+
+## Overview
+
+This application is designed for users who want to monitor and analyze their Novelan/Luxtronik heat pump performance over time. It provides detailed operational data collection that enables:
+
+- Performance monitoring and optimization
+- Energy consumption analysis
+- Fault detection and preventive maintenance
+- Historical data analysis for system efficiency
+
+The system collects over 1,800 sensor readings every 30 seconds, providing granular insights into heat pump operation that are not available through the standard web interface.
 
 ## Features
 
 **Note**: When running tests, ensure the `PYTHONPATH` environment variable is set to the root directory of the project. This can be done by running `export PYTHONPATH=.` before executing the tests.
 - **Continuous Polling**: Default 30-second interval for real-time data collection.
 - **Crash-Safe Storage**: Buffers and caches data to prevent loss.
-- **CSV Roll-Ups**: Generates daily and weekly CSV files for analysis.
+- **Comprehensive Data Collection**: Collects 1860+ sensor readings per poll
+- **CSV Roll-Ups**: Generates daily and weekly CSV files for analysis with detailed heat pump data.
 - **Dockerized Deployment**: Easy containerization for seamless operation.
 - **TDD-First**: High test coverage (≥90%) ensures reliability.
 - **On-Demand Reports**: Generate daily/weekly CSV reports at any time.
@@ -28,20 +40,6 @@ A resilient, fully-automated data-logging service for Novelan heat pumps using `
    ```
    - Mount a volume for persistent logs (`./data:/app/data`).
    - Use `--env-file .env` to pass configuration (refer to `.env.sample` for required variables).
-
-   **Important Networking Note**: If your heat pump is on a different subnet (e.g., 192.168.20.0/24) than your Docker host (e.g., 10.0.0.0/24):
-   ```bash
-   # Add route on the host before running
-   sudo ip route add 192.168.20.0/24 via 10.0.0.1 dev ens18
-
-   # For virtualized environments (LXD/LXC), you may also need:
-   sudo sysctl -w net.ipv4.conf.all.rp_filter=0
-   sudo sysctl -w net.ipv4.conf.ens18.rp_filter=0
-   sudo sysctl -w net.ipv4.ip_forward=1
-
-   # Run with host networking mode
-   docker run --network=host --env-file .env -v ./logs:/app/logs lux-logger
-   ```
 
 ## Configuration
 Copy `.env.sample` to `.env` and configure:
@@ -143,6 +141,18 @@ This test will:
 4. Execute on-demand report generation
 5. Validate the generated CSV files
 
+## Data Collection Details
+
+The system collects comprehensive data from your heat pump with over 1,800 sensor readings per collection cycle:
+
+- **Temperature Sensors**: Flow, return, ambient, water, source, and solar temperatures
+- **System Parameters**: Operation modes, pump status, and error codes
+- **Visibility Settings**: Status information and configuration settings
+- **Performance Metrics**: Flow rates, pressures, and energy consumption values
+- **Status Information**: Operation modes, timers, setpoints, and error histories
+
+Each data point contains over 1,800 sensor readings collected every 30 seconds by default, providing detailed operational insights.
+
 ## On-Demand Report Generation
 To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:
 
@@ -159,6 +169,18 @@ This will create the same daily and weekly CSV files as the scheduled job, using
 - Exit after completion
 
 This is useful for generating reports at specific times or for debugging purposes.
+
+## Troubleshooting
+
+If you encounter issues with data collection or CSV generation:
+
+1. **Check Connection**: Ensure your heat pump is accessible at the configured IP and port
+2. **Enable Debug Logging**: Run `python debug_heatpump.py` for comprehensive diagnostics
+3. **Test Data Collection**: Use `python test_data_improvements.py` for complete validation
+
+### Common Issues
+- **Small CSV Files**: Verify that the system is collecting the full dataset (should be 1800+ sensor readings)
+- **Empty Data**: Check that data validation is passing (minimum 100 sensors required)
 
 ## Future Roadmap
 - 365-day retention (SQLite).
