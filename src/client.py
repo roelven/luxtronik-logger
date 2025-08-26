@@ -50,18 +50,61 @@ class HeatPumpClient:
             self.logger.debug("Retrieving sensor readings from heat pump")
             start_time = time.time()
 
-            # Get raw data from connection
-            calculations = {f"calculations.{k}": v for k, v in self.connection.calculations.__dict__.items() if not k.startswith('_')}
-            parameters = {f"parameters.{k}": v for k, v in self.connection.parameters.__dict__.items() if not k.startswith('_')}
-            visibilities = {f"visibilities.{k}": v for k, v in self.connection.visibilities.__dict__.items() if not k.startswith('_')}
+            # Get data using proper luxtronik API methods with numeric indices
+            try:
+                # Get all available data using numeric indices
+                calculations_dict = {}
+                parameters_dict = {}
+                visibilities_dict = {}
+
+                # Get calculations data (typically 275 items)
+                for i in range(275):
+                    try:
+                        entry = self.connection.calculations.get(i)
+                        if hasattr(entry, 'value'):
+                            key_name = entry.name if hasattr(entry, 'name') and not entry.name.startswith('Unknown') else f"calculations.{i}"
+                            calculations_dict[f"calculations.{key_name}"] = entry.value
+                    except Exception as e:
+                        self.logger.debug(f"Failed to get calculations.{i}: {e}")
+
+                # Get parameters data (typically 1187 items)
+                for i in range(1187):
+                    try:
+                        entry = self.connection.parameters.get(i)
+                        if hasattr(entry, 'value'):
+                            key_name = entry.name if hasattr(entry, 'name') and not entry.name.startswith('Unknown') else f"parameters.{i}"
+                            parameters_dict[f"parameters.{key_name}"] = entry.value
+                    except Exception as e:
+                        self.logger.debug(f"Failed to get parameters.{i}: {e}")
+
+                # Get visibilities data (typically 398 items)
+                for i in range(398):
+                    try:
+                        entry = self.connection.visibilities.get(i)
+                        if hasattr(entry, 'value'):
+                            key_name = entry.name if hasattr(entry, 'name') and not entry.name.startswith('Unknown') else f"visibilities.{i}"
+                            visibilities_dict[f"visibilities.{key_name}"] = entry.value
+                    except Exception as e:
+                        self.logger.debug(f"Failed to get visibilities.{i}: {e}")
+
+            except Exception as api_error:
+                self.logger.warning(f"API methods failed, falling back to __dict__: {api_error}")
+                # Fallback to __dict__ approach if API methods fail
+                calculations_dict = {f"calculations.{k}": v for k, v in self.connection.calculations.__dict__.items() if not k.startswith('_')}
+                parameters_dict = {f"parameters.{k}": v for k, v in self.connection.parameters.__dict__.items() if not k.startswith('_')}
+                visibilities_dict = {f"visibilities.{k}": v for k, v in self.connection.visibilities.__dict__.items() if not k.startswith('_')}
 
             readings = {}
-            readings.update(calculations)
-            readings.update(parameters)
-            readings.update(visibilities)
+            readings.update(calculations_dict)
+            readings.update(parameters_dict)
+            readings.update(visibilities_dict)
 
             self.logger.debug(f"Retrieved {len(readings)} sensor readings")
             self.logger.debug(f"Sample data: {dict(list(readings.items())[:3])}")  # Log first 3 items
+
+            # Log data source information for debugging
+            api_success = 'calculations_dict' in locals() and len(calculations_dict) > 0
+            self.logger.debug(f"Data source: {'API methods' if api_success else '__dict__ fallback'}")
 
             elapsed = time.time() - start_time
             self.logger.debug(f"Retrieved {len(readings)} sensor readings in {elapsed:.2f}s")

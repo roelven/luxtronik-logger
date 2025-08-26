@@ -1,5 +1,80 @@
 # CLAUDE.md
 
+## Data Collection Improvement Plan
+
+### Problem Analysis
+The current data collection from the live heat pump test generates CSV files that are too small, indicating potential issues with:
+1. **Data Access Method**: Using `__dict__` on luxtronik objects may not properly access all available sensor data
+2. **Data Filtering**: Important sensor data might be excluded by current filtering logic
+3. **Debug Information**: Insufficient logging to diagnose what data is actually being collected
+
+### Immediate Action Plan
+
+#### 1. Enhanced Debugging and Diagnostics
+Create comprehensive debug scripts to:
+- Inspect all available sensor data
+- Validate data completeness before CSV generation
+
+#### 2. Improved Data Collection Methods
+Update `client.py` to use proper luxtronik API methods instead of `__dict__`:
+- Use `connection.calculations.get_all()` for structured access
+- Use `connection.parameters.get_all()` for parameter values
+- Use `connection.visibilities.get_all()` for visibility data
+
+#### 3. Comprehensive Data Validation
+Implement validation scripts to:
+- Check data completeness and quality
+- Verify critical sensor presence
+
+#### 4. Production-Ready Improvements
+- Implement data validation checks before storage
+- Add fallback mechanisms for missing sensor data
+- Enhance error reporting with specific sensor availability information
+
+### Implementation Steps
+
+#### Step 1: Enhanced Client Debugging
+Modify `client.py` to include:
+- Detailed logging of all available sensor names and values
+- Connection diagnostics and heat pump capability reporting
+- Data completeness validation before storage
+
+#### Step 2: Proper Data Access
+Replace current `__dict__` approach with proper luxtronik API methods for structured data access
+
+#### Step 3: Data Quality Assurance
+Add validation to ensure:
+- Minimum number of sensors are available
+- Critical temperature sensors are present
+- Data values are within reasonable ranges
+- Timestamps are consistent and sequential
+
+#### Step 4: Comprehensive Testing
+Create diagnostic test scripts for:
+- Detailed data inspection
+- Data quality validation
+
+### Expected Sensor Data
+A properly functioning heat pump should provide:
+- **Temperature Sensors**: TVL, TRL, TA, TWA, TWE, TSK, TSS, etc.
+- **System Parameters**: Heating modes, pump status, error codes
+- **Performance Metrics**: Flow rates, pressures, energy consumption
+- **Status Information**: Operation modes, timers, setpoints
+
+### Troubleshooting Guide
+
+#### If CSV files are empty or small:
+2. **Enable Debug Logging**: Run with `--log-level DEBUG` to see detailed data
+3. **Test Data Collection**: Use debug scripts to see what data is available
+4. **Validate Sensor Access**: Ensure proper luxtronik API methods are used
+
+### Production Deployment Checklist
+- [ ] Data collection produces >50 sensor readings per poll
+- [ ] CSV files contain multiple rows with complete data
+- [ ] All critical temperature sensors are present
+- [ ] Data validation passes before storage
+- [ ] Connection diagnostics show healthy communication
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
