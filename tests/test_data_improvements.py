@@ -98,7 +98,7 @@ def test_data_validation():
     print("=" * 50)
 
     try:
-        from validate_data import DataValidator, quick_validation
+        from src.validate_data import DataValidator, quick_validation
 
         # Test with real heat pump data
         from client import HeatPumpClient

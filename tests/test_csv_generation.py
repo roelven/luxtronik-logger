@@ -20,9 +20,9 @@ from datetime import datetime, timedelta
 # Add src to path so we can import our modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from csvgen import CSVGenerator
-from service import LuxLoggerService
-from config import Config
+from src.csvgen import CSVGenerator
+from src.service import LuxLoggerService
+from src.config import Config
 
 def create_test_data(data_dir):
     """Create test data in SQLite cache"""

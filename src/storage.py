@@ -6,7 +6,7 @@ import logging
 
 # Import validation module
 try:
-    from validate_data import DataValidator, quick_validation
+    from src.validate_data import DataValidator, quick_validation
 except ImportError:
     # Fallback for when validate_data is not available
     DataValidator = None

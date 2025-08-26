@@ -97,7 +97,7 @@ The improved system now successfully collects:
 
 #### If CSV files are empty or small:
 2. **Enable Debug Logging**: Run `python debug_heatpump.py` for comprehensive diagnostics
-3. **Test Data Collection**: Use `python test_data_improvements.py` for complete validation
+3. **Test Data Collection**: Use `python tests/test_data_improvements.py` for complete validation
 4. **Validate Sensor Access**: Proper API methods now implemented and validated
 
 ### Production Deployment Checklist
@@ -113,8 +113,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Diagnostic Tools
 - `python debug_heatpump.py` - Comprehensive heat pump diagnostics
-- `python test_data_improvements.py` - Complete validation test suite
-- `python test_report_generation.py` - Report generation testing
+- `python tests/test_data_improvements.py` - Complete validation test suite
+- `python tests/test_report_generation.py` - Report generation testing
 
 ### Core Validation
 - `validate_data.py` - Data quality assurance framework
@@ -124,7 +124,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Quick Start
 ```bash
 # Test data collection improvements
-python test_data_improvements.py
+python tests/test_data_improvements.py
 
 # Run comprehensive diagnostics
 python debug_heatpump.py

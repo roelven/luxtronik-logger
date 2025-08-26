@@ -176,7 +176,7 @@ If you encounter issues with data collection or CSV generation:
 
 1. **Check Connection**: Ensure your heat pump is accessible at the configured IP and port
 2. **Enable Debug Logging**: Run `python debug_heatpump.py` for comprehensive diagnostics
-3. **Test Data Collection**: Use `python test_data_improvements.py` for complete validation
+3. **Test Data Collection**: Use `python tests/test_data_improvements.py` for complete validation
 
 ### Common Issues
 - **Small CSV Files**: Verify that the system is collecting the full dataset (should be 1800+ sensor readings)
