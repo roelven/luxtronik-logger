@@ -44,3 +44,4 @@ heatpump_detailed_report.json
 # Temporary files
 *.tmp
 *.temp
+ISSUE-*.md
