@@ -5,7 +5,7 @@
 The goal is to build a resilient, fully-automated data-logging service for a Novelan heat pump using python-luxtronik. Key features:
 - Continuous polling (30s default interval)
 - Crash-safe time-series storage (buffer + cache)
-- Daily/weekly CSV roll-ups
+- Daily/weekly CSV roll-ups with readable headers option
 - Dockerized deployment
 - TDD-first development (≥90% coverage)
 
@@ -90,12 +90,20 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - Weekly: YYYY-MM-DD_weekly.csv (last 7d, 1860+ columns)
 - Skip if no validated data (log warning with validation details)
 - Comprehensive data validation before generation
+- Optional readable headers (human-friendly sensor names instead of raw IDs)
 
 ## Future Roadmap
 - 365-day retention (SQLite)
 - Selective exports (sensor filtering)
 - Web UI (FastAPI + React/Dash)
 - Multi-format exports (JSON, DTA)
+
+## Readable CSV Headers Feature
+The system now supports human-readable sensor names in CSV headers through the `READABLE_HEADERS` configuration option. When enabled, raw sensor IDs like "calculations.ID_WEB_Temperatur_TVL" are replaced with descriptive names like "Flow Temperature". This feature includes:
+- Over 500 comprehensive sensor mappings for calculations, parameters, and visibilities
+- Graceful fallback to original IDs when mappings are not available
+- Backward compatibility - feature is disabled by default
+- No impact on data values - only headers are affected
 
 ## On-Demand Report Generation
 To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:
