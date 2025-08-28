@@ -28,6 +28,7 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
 - **Daily**: `YYYY-MM-DD_daily.csv` (last 24 hours of data).
 - **Weekly**: `YYYY-MM-DD_weekly.csv` (last 7 days of data).
 - **Auto-Cleanup**: Deletes CSVs older than 30 days (configurable).
+- **Readable Headers**: Set `READABLE_HEADERS=true` in `.env` to use human-readable sensor names in CSV headers (e.g., "Flow Temperature" instead of "calculations.ID_WEB_Temperatur_TVL").
 
 ## Docker Usage
 1. **Build**:
@@ -49,6 +50,7 @@ Copy `.env.sample` to `.env` and configure:
 - `CSV_TIME`: Daily CSV generation time (default: `07:00`).
 - `CACHE_PATH`: SQLite cache file path.
 - `OUTPUT_DIRS`: Paths for daily/weekly CSVs.
+- `READABLE_HEADERS`: Set to `true` to use human-readable sensor names in CSV headers (default: `false`).
 
 ## Development
 - **Tests**:
