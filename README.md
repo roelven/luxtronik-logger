@@ -170,12 +170,13 @@ python generate_live_csv.py --output ./output --duration 120
 ```
 
 This script:
-1. First checks for sufficient recent data in cache (last 30 minutes)
-2. If available, generates CSV reports from cached data (fast, no waiting)
-3. Otherwise, connects to your live heat pump and collects real sensor data
-4. Generates daily and weekly CSV reports
-5. Saves the CSV files to the specified output directory
-6. Shows a sample of the generated CSV content
+1. Loads configuration from `.env` file (copy `env.sample` to `.env` and configure)
+2. First checks for sufficient recent data in cache (last 30 minutes)
+3. If available, generates CSV reports from cached data (fast, no waiting)
+4. Otherwise, connects to your live heat pump and collects real sensor data
+5. Generates daily and weekly CSV reports
+6. Saves the CSV files to the specified output directory
+7. Shows a sample of the generated CSV content
 
 ### Docker-Based Test (Advanced)
 To test the full workflow with a mock heat pump:

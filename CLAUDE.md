@@ -152,18 +152,18 @@ This test:
 To test CSV generation with your actual heat pump:
 
 ```bash
-# Run the live heat pump test (connects to 192.168.20.180:8889)
+# Run the live heat pump test (connects to heat pump from .env configuration)
 python tests/test_live_heatpump.py
 ```
 
 This test:
-1. Connects to your live heat pump at 192.168.20.180:8889
+1. Connects to your live heat pump using configuration from `.env` file
 2. Collects real sensor data for 61 seconds (2+ data points)
 3. Generates daily and weekly CSV reports
 4. Validates the structure and content of generated CSV files
 
 ### Generate and Save CSV Files
-To generate CSV files from your live heat pump and save them permanently:
+To generate CSV files from your heat pump and save them permanently:
 
 ```bash
 # Generate CSV files and save to ./output directory
@@ -174,11 +174,13 @@ python generate_live_csv.py --output ./output --duration 120
 ```
 
 This script:
-1. Connects to your live heat pump at 192.168.20.180:8889
-2. Collects real sensor data for the specified duration
-3. Generates daily and weekly CSV reports
-4. Saves the CSV files to the specified output directory
-5. Shows a sample of the generated CSV content
+1. Loads configuration from `.env` file (copy `env.sample` to `.env` and configure)
+2. First checks for sufficient recent data in cache (last 30 minutes)
+3. If available, generates CSV reports from cached data (fast, no waiting)
+4. Otherwise, connects to your heat pump and collects real sensor data
+5. Generates daily and weekly CSV reports
+6. Saves the CSV files to the specified output directory
+7. Shows a sample of the generated CSV content
 
 ### Docker-Based Test (Advanced)
 To test the full workflow with a mock heat pump:

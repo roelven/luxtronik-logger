@@ -9,6 +9,13 @@ This script:
 """
 
 import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load environment variables from .env file
+except ImportError:
+    pass  # dotenv is optional, continue without it
+
+import os
 import sys
 import time
 import csv
@@ -126,17 +133,24 @@ def collect_and_generate_csv(output_dir="output", duration=61):
         print("🔄 Collecting live data from heat pump...")
 
     try:
-        # Create config for live heat pump
+        # Create config for live heat pump - load from environment variables
         config = Config()
-        config.host = "192.168.20.180"
-        config.port = 8889
+        config.load()  # Load from .env file and environment variables
+        # Override cache path and output dirs for this specific run
         config.cache_path = cache_path
         config.output_dirs = {
             "daily": daily_dir,
             "weekly": weekly_dir
         }
-        config.csv_retention_days = 30
-        config.interval_sec = 30  # Default interval
+        # Set defaults if not specified in .env
+        if not config.host:
+            config.host = "192.168.20.180"  # Default heat pump IP
+        if not config.port:
+            config.port = 8889  # Default heat pump port
+        if not config.interval_sec:
+            config.interval_sec = 30  # Default interval
+        if not config.csv_retention_days:
+            config.csv_retention_days = 30  # Default retention
 
         # Create storage
         storage = DataStorage(cache_path)
