@@ -91,6 +91,7 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - Skip if no validated data (log warning with validation details)
 - Comprehensive data validation before generation
 - Optional readable headers (human-friendly sensor names instead of raw IDs)
+- When enabled, only mapped sensors are included in CSV output
 
 ## Future Roadmap
 - 365-day retention (SQLite)
@@ -99,11 +100,12 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - Multi-format exports (JSON, DTA)
 
 ## Readable CSV Headers Feature
-The system now supports human-readable sensor names in CSV headers through the `READABLE_HEADERS` configuration option. When enabled, raw sensor IDs like "calculations.ID_WEB_Temperatur_TVL" are replaced with descriptive names like "Flow Temperature". This feature includes:
+The system now supports human-readable sensor names in CSV headers through the `READABLE_HEADERS` configuration option. When enabled, raw sensor IDs like "calculations.ID_WEB_Temperatur_TVL" are replaced with descriptive names like "Flow Temperature", and unmapped sensors are excluded from the CSV output. This feature includes:
 - Over 500 comprehensive sensor mappings for calculations, parameters, and visibilities
-- Graceful fallback to original IDs when mappings are not available
-- Backward compatibility - feature is disabled by default
-- No impact on data values - only headers are affected
+- When `READABLE_HEADERS=true`: Only mapped sensors appear in CSV output with readable names
+- When `READABLE_HEADERS=false`: All sensors appear in CSV output with raw IDs (backward compatibility)
+- All sensor data is always stored in the database regardless of CSV output settings
+- No impact on data values - only headers and which sensors are included are affected
 
 ## On-Demand Report Generation
 To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:

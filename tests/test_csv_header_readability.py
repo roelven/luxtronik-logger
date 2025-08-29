@@ -77,7 +77,7 @@ class TestCSVHeaderReadability:
             }
         ]
 
-        # Test with readable headers enabled
+        # Test with readable headers enabled - unmapped sensors should be excluded
         with patch.dict("os.environ", {"READABLE_HEADERS": "true"}):
             generator = CSVGenerator(output_dirs)
             filepath = generator.generate_daily_csv(test_data, datetime.now())
@@ -85,11 +85,25 @@ class TestCSVHeaderReadability:
             # Verify the file exists
             assert os.path.exists(filepath)
 
-            # Read the CSV and verify fallback behavior
+            # Read the CSV and verify behavior
             with open(filepath) as f:
                 first_line = f.readline().strip()
                 assert "Flow Temperature" in first_line  # Mapped name present
-                assert "calculations.ID_WEB_UnknownSensor" in first_line  # Unmapped ID present
+                assert "calculations.ID_WEB_UnknownSensor" not in first_line  # Unmapped ID excluded
+
+        # Test with readable headers disabled - all sensors should be included
+        with patch.dict("os.environ", {"READABLE_HEADERS": "false"}):
+            generator = CSVGenerator(output_dirs)
+            filepath = generator.generate_daily_csv(test_data, datetime.now())
+
+            # Verify the file exists
+            assert os.path.exists(filepath)
+
+            # Read the CSV and verify all sensors included
+            with open(filepath) as f:
+                first_line = f.readline().strip()
+                assert "calculations.ID_WEB_Temperatur_TVL" in first_line  # Raw ID present
+                assert "calculations.ID_WEB_UnknownSensor" in first_line  # Raw ID present
 
     def test_data_values_unchanged(self, tmp_path):
         # Verify that data values remain unchanged when using readable headers

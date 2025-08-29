@@ -28,7 +28,7 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
 - **Daily**: `YYYY-MM-DD_daily.csv` (last 24 hours of data).
 - **Weekly**: `YYYY-MM-DD_weekly.csv` (last 7 days of data).
 - **Auto-Cleanup**: Deletes CSVs older than 30 days (configurable).
-- **Readable Headers**: Set `READABLE_HEADERS=true` in `.env` to use human-readable sensor names in CSV headers (e.g., "Flow Temperature" instead of "calculations.ID_WEB_Temperatur_TVL"). Over 500 sensor mappings available for calculations, parameters, and visibilities.
+- **Readable Headers**: Set `READABLE_HEADERS=true` in `.env` to use human-readable sensor names in CSV headers (e.g., "Flow Temperature" instead of "calculations.ID_WEB_Temperatur_TVL"). Unmapped sensors are excluded from CSV output. Over 500 sensor mappings available for calculations, parameters, and visibilities.
 
 ## Docker Usage
 1. **Build**:
@@ -50,7 +50,7 @@ Copy `.env.sample` to `.env` and configure:
 - `CSV_TIME`: Daily CSV generation time (default: `07:00`).
 - `CACHE_PATH`: SQLite cache file path.
 - `OUTPUT_DIRS`: Paths for daily/weekly CSVs.
-- `READABLE_HEADERS`: Set to `true` to use human-readable sensor names in CSV headers (default: `false`). When enabled, sensor IDs like "calculations.ID_WEB_Temperatur_TVL" are replaced with readable names like "Flow Temperature".
+- `READABLE_HEADERS`: Set to `true` to use human-readable sensor names in CSV headers (default: `false`). When enabled, only sensors with mappings are included in CSV output using readable names like "Flow Temperature" instead of raw IDs.
 
 ## Development
 - **Tests**:
@@ -150,7 +150,7 @@ The system collects comprehensive data from your heat pump with over 1,800 senso
 - **Temperature Sensors**: Flow, return, ambient, water, source, and solar temperatures
 - **System Parameters**: Operation modes, pump status, and error codes
 - **Visibility Settings**: Status information and configuration settings
-- **Readable Headers**: Human-readable sensor names for over 500 sensors including temperatures, pressures, operating times, status indicators, and more
+- **Readable Headers**: Human-readable sensor names for over 500 sensors including temperatures, pressures, operating times, status indicators, and more. Unmapped sensors are excluded from CSV output but stored in database.
 - **Performance Metrics**: Flow rates, pressures, and energy consumption values
 - **Status Information**: Operation modes, timers, setpoints, and error histories
 

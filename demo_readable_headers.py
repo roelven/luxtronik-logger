@@ -61,15 +61,16 @@ def demo_readable_headers():
     print("-" * 30)
 
     # Show the CSV content
-    print("\n📋 CSV with Readable Headers:")
+    print("\n📋 CSV with Readable Headers (unmapped sensors excluded):")
     with open(filepath, 'r') as f:
         content = f.read()
         print(content)
 
     print("\n📝 Explanation:")
-    print("The CSV above shows human-readable sensor names like 'Flow Temperature' instead of")
-    print("raw sensor IDs like 'calculations.ID_WEB_Temperatur_TVL'. This makes the data")
-    print("much easier to understand and work with in spreadsheet applications.")
+    print("The CSV above shows ONLY human-readable sensor names like 'Flow Temperature'.")
+    print("Unmapped sensors (like 'calculations.0') are completely excluded from the output.")
+    print("This makes the data much cleaner and easier to work with in spreadsheet applications.")
+    print("All sensor data is still stored in the database for future mapping.")
 
     print("✅ Demo completed successfully!")
     print(f"📁 Output file saved to: {os.path.abspath(filepath)}")

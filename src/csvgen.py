@@ -576,12 +576,26 @@ class CSVGenerator:
         """Convert raw sensor ID to human-readable name if mapping exists"""
         return self.SENSOR_NAME_MAPPINGS.get(raw_id, raw_id)
 
+    def _should_include_field(self, field_name: str) -> bool:
+        """Determine if a field should be included in the CSV output.
+
+        When readable_headers is enabled, only include fields that have mappings.
+        When readable_headers is disabled, include all fields.
+        """
+        if not self.readable_headers:
+            return True
+
+        # When readable_headers is enabled, only include fields with mappings
+        return field_name in self.SENSOR_NAME_MAPPINGS
+
     def _get_readable_fieldnames(self, fieldnames: List[str]) -> List[str]:
         """Convert fieldnames to readable names if readable_headers is enabled"""
         if not self.readable_headers:
             return fieldnames
 
-        return [self._convert_to_readable_name(field) for field in fieldnames]
+        # Filter to only include fields that have mappings, then convert to readable names
+        filtered_fieldnames = [field for field in fieldnames if self._should_include_field(field)]
+        return [self._convert_to_readable_name(field) for field in filtered_fieldnames]
 
     def _write_csv(self, filepath: str, data: List[Dict]) -> None:
         """Write data to CSV file with headers"""
@@ -598,11 +612,18 @@ class CSVGenerator:
             # Convert to readable fieldnames if enabled
             fieldnames = self._get_readable_fieldnames(original_fieldnames)
 
-            # Create a mapping from original to readable fieldnames
-            fieldname_mapping = {
-                original: readable
-                for original, readable in zip(original_fieldnames, fieldnames)
-            }
+            # Create a mapping from original to readable fieldnames (only for included fields)
+            if self.readable_headers:
+                fieldname_mapping = {
+                    original: readable
+                    for original, readable in zip(original_fieldnames, fieldnames)
+                    if original in self.SENSOR_NAME_MAPPINGS  # Only map fields with mappings
+                }
+            else:
+                fieldname_mapping = {
+                    original: readable
+                    for original, readable in zip(original_fieldnames, fieldnames)
+                }
 
             with open(filepath, 'w', newline='') as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -614,6 +635,7 @@ class CSVGenerator:
                         readable_data = {
                             fieldname_mapping[key]: value
                             for key, value in point["data"].items()
+                            if key in fieldname_mapping  # Only include mapped fields
                         }
                         writer.writerow(readable_data)
                     else:
