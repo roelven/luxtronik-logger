@@ -6,6 +6,7 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 - Continuous polling (30s default interval)
 - Crash-safe time-series storage (buffer + cache)
 - Daily/weekly CSV roll-ups with readable headers option
+- Smart data usage (uses cached data when available)
 - Dockerized deployment
 - TDD-first development (≥90% coverage)
 
@@ -31,6 +32,7 @@ The goal is to build a resilient, fully-automated data-logging service for a Nov
 3. Store validated data in buffer → flush to cache
 4. Generate CSVs with 1860+ sensor columns (daily @ 07:00, weekly)
 5. Auto-delete CSVs >30d old
+6. Smart CSV generation uses recent cached data when available
 
 ### Key Dependencies
 - python-luxtronik
@@ -106,6 +108,13 @@ The system now supports human-readable sensor names in CSV headers through the `
 - When `READABLE_HEADERS=false`: All sensors appear in CSV output with raw IDs (backward compatibility)
 - All sensor data is always stored in the database regardless of CSV output settings
 - No impact on data values - only headers and which sensors are included are affected
+
+## Smart Data Usage Feature
+The system now intelligently uses cached data for CSV generation when available:
+- Checks for recent data in cache (last 30 minutes) before collecting live data
+- Uses cached data when sufficient recent data exists (significantly faster)
+- Falls back to live data collection only when needed
+- No impact on data quality - all CSVs contain the same comprehensive data
 
 ## On-Demand Report Generation
 To generate reports on-demand (outside of the scheduled daily generation), use the command-line interface:

@@ -11,7 +11,7 @@ This application is designed for users who want to monitor and analyze their Nov
 - Fault detection and preventive maintenance
 - Historical data analysis for system efficiency
 
-The system collects over 1,800 sensor readings every 30 seconds, providing granular insights into heat pump operation that are not available through the standard web interface.
+The system collects over 1,800 sensor readings every 30 seconds, providing granular insights into heat pump operation that are not available through the standard web interface. When generating CSV reports, it automatically uses recent cached data when available, falling back to live data collection only when needed.
 
 ## Features
 
@@ -20,6 +20,7 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
 - **Crash-Safe Storage**: Buffers and caches data to prevent loss.
 - **Comprehensive Data Collection**: Collects 1860+ sensor readings per poll
 - **CSV Roll-Ups**: Generates daily and weekly CSV files for analysis with detailed heat pump data.
+- **Smart Data Usage**: Automatically uses recent cached data for CSV generation when available.
 - **Dockerized Deployment**: Easy containerization for seamless operation.
 - **TDD-First**: High test coverage (≥90%) ensures reliability.
 - **On-Demand Reports**: Generate daily/weekly CSV reports at any time.
@@ -28,6 +29,7 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
 - **Daily**: `YYYY-MM-DD_daily.csv` (last 24 hours of data).
 - **Weekly**: `YYYY-MM-DD_weekly.csv` (last 7 days of data).
 - **Auto-Cleanup**: Deletes CSVs older than 30 days (configurable).
+- **Smart Data Source**: Uses recent cached data (last 30 minutes) when available, otherwise collects live data.
 - **Readable Headers**: Set `READABLE_HEADERS=true` in `.env` to use human-readable sensor names in CSV headers (e.g., "Flow Temperature" instead of "calculations.ID_WEB_Temperatur_TVL"). Unmapped sensors are excluded from CSV output. Over 500 sensor mappings available for calculations, parameters, and visibilities.
 
 ## Docker Usage
@@ -157,7 +159,7 @@ This test:
 4. Validates the structure and content of generated CSV files
 
 ### Generate and Save CSV Files
-To generate CSV files from your live heat pump and save them permanently:
+To generate CSV files from your heat pump and save them permanently:
 
 ```bash
 # Generate CSV files and save to ./output directory
@@ -168,11 +170,12 @@ python generate_live_csv.py --output ./output --duration 120
 ```
 
 This script:
-1. Connects to your live heat pump at 192.168.20.180:8889
-2. Collects real sensor data for the specified duration
-3. Generates daily and weekly CSV reports
-4. Saves the CSV files to the specified output directory
-5. Shows a sample of the generated CSV content
+1. First checks for sufficient recent data in cache (last 30 minutes)
+2. If available, generates CSV reports from cached data (fast, no waiting)
+3. Otherwise, connects to your live heat pump and collects real sensor data
+4. Generates daily and weekly CSV reports
+5. Saves the CSV files to the specified output directory
+6. Shows a sample of the generated CSV content
 
 ### Docker-Based Test (Advanced)
 To test the full workflow with a mock heat pump:
