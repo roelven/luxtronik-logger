@@ -40,11 +40,57 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
    docker run --env-file .env -v ./data:/app/data lux-logger
    ```
    - Mount a volume for persistent logs (`./data:/app/data`).
-   - Use `--env-file .env` to pass configuration (refer to `.env.sample` for required variables).
+   - Use `--env-file .env` to pass configuration (refer to `env.sample` for required variables).
+
+## ⚠️ Networking Notes (Rootless Docker & Multiple Subnets)
+
+When the heat pump resides on a different subnet (e.g., `192.168.20.0/24`) than the Docker host (e.g., `10.0.0.0/24`), and you are using rootless Docker, standard networking modes may not work:
+
+- `--network host` does not expose the real host network in rootless mode. It uses a slirp4netns stack (`10.0.2.0/24`) that cannot reach LAN devices like the heat pump.
+- **Bridge mode** works only if NAT is set up correctly and inter-VLAN routing is allowed on your router/firewall.
+
+**Mitigation: Host-Level TCP Proxy (socat)**
+The simplest and most robust solution is to run a small TCP proxy on the host that forwards traffic from the Docker container to the heat pump:
+
+1. Install socat:
+`sudo apt-get install socat`
+
+2. Start the proxy (listens on all interfaces, forwards to the heat pump):
+`sudo nohup socat TCP-LISTEN:8889,bind=0.0.0.0,fork,reuseaddr TCP:192.168.20.180:8889 >/tmp/socat.log 2>&1 &`
+
+3. Update .env so the app connects to the host instead of the pump directly:
+```
+HOST=10.0.0.227   # IP of the Docker host
+PORT=8889
+```
+
+4. Run the container normally:
+`docker run --env-file .env -v ./data:/app/data lux-logger`
+
+The container now connects to the host proxy at `10.0.0.227:8889`. Socat forwards this transparently to the heat pump at `192.168.20.180:8889`.
+
+**Persistence**
+To ensure the proxy runs after reboot, create a systemd unit:
+```
+# /etc/systemd/system/lux-socat.service
+[Unit]
+Description=Socat TCP proxy for Luxtronik heat pump
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/socat TCP-LISTEN:8889,bind=0.0.0.0,fork,reuseaddr TCP:192.168.20.180:8889
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+`sudo systemctl enable --now lux-socat.service`
 
 ## Configuration
 Copy `.env.sample` to `.env` and configure:
-- `HOST`: Heat pump IP address.
+- `HOST`: Heat pump IP address (or Docker host IP if using socat proxy).
 - `PORT`: Heat pump port (default: `8889`).
 - `INTERVAL_SEC`: Polling interval (default: `30`).
 - `CSV_TIME`: Daily CSV generation time (default: `07:00`).
