@@ -18,12 +18,13 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
 **Note**: When running tests, ensure the `PYTHONPATH` environment variable is set to the root directory of the project. This can be done by running `export PYTHONPATH=.` before executing the tests.
 - **Continuous Polling**: Default 30-second interval for real-time data collection.
 - **Crash-Safe Storage**: Buffers and caches data to prevent loss.
-- **Comprehensive Data Collection**: Collects 1860+ sensor readings per poll
+- **Comprehensive Data Collection**: Collects 1800+ sensor readings per poll
 - **CSV Roll-Ups**: Generates daily and weekly CSV files for analysis with detailed heat pump data.
 - **Smart Data Usage**: Automatically uses recent cached data for CSV generation when available.
 - **Dockerized Deployment**: Easy containerization for seamless operation.
 - **TDD-First**: High test coverage (≥90%) ensures reliability.
 - **On-Demand Reports**: Generate daily/weekly CSV reports at any time.
+- **Web Interface**: Modern web dashboard for real-time status monitoring and CSV downloads.
 
 ## CSV Generation
 - **Daily**: `YYYY-MM-DD_daily.csv` (last 24 hours of data).
@@ -31,6 +32,30 @@ The system collects over 1,800 sensor readings every 30 seconds, providing granu
 - **Auto-Cleanup**: Deletes CSVs older than 30 days (configurable).
 - **Smart Data Source**: Uses recent cached data (last 30 minutes) when available, otherwise collects live data.
 - **Readable Headers**: Set `READABLE_HEADERS=true` in `.env` to use human-readable sensor names in CSV headers (e.g., "Flow Temperature" instead of "calculations.ID_WEB_Temperatur_TVL"). Unmapped sensors are excluded from CSV output. Over 500 sensor mappings available for calculations, parameters, and visibilities.
+
+## Web Interface
+The Luxtronik Logger now includes a modern web interface built with FastAPI and NiceGUI:
+
+- **Real-time Status Dashboard**: View current temperature readings, system flags, and operational status
+- **CSV Report Downloads**: Easily download daily and weekly CSV reports through the web interface
+- **Responsive Design**: Works on desktop and mobile devices
+- **No Authentication Required**: Simple internal interface for local network access
+
+To start the web interface:
+```bash
+# Run web interface only
+python main.py --mode web
+
+# Run both logger service and web interface together
+./run_with_web.sh
+```
+
+The web interface will be available at http://localhost:8000
+
+### Web API Endpoints
+- `GET /status` - Returns latest heat pump status as JSON
+- `GET /reports` - Lists all available CSV reports with metadata
+- `GET /download/{report_type}/{filename}` - Download CSV reports (report_type: daily or weekly)
 
 ## Docker Usage
 1. **Build**:
@@ -97,7 +122,8 @@ Copy `.env.sample` to `.env` and configure:
 - `INTERVAL_SEC`: Polling interval (default: `30`).
 - `CSV_TIME`: Daily CSV generation time (default: `07:00`).
 - `CACHE_PATH`: SQLite cache file path.
-- `OUTPUT_DIRS`: Paths for daily/weekly CSVs.
+- `OUTPUT_DIRS_DAILY`: Path for daily CSVs (default: `/app/data/reports/daily`).
+- `OUTPUT_DIRS_WEEKLY`: Path for weekly CSVs (default: `/app/data/reports/weekly`).
 - `READABLE_HEADERS`: Set to `true` to use human-readable sensor names in CSV headers (default: `false`). When enabled, only sensors with mappings are included in CSV output using readable names like "Flow Temperature" instead of raw IDs.
 
 ## Development
@@ -119,6 +145,7 @@ Copy `.env.sample` to `.env` and configure:
   - `storage.py`: Buffer + cache management.
   - `csvgen.py`: CSV generation.
   - `service.py`: Main scheduler.
+  - `web.py`: Web interface with FastAPI and NiceGUI.
   - `main.py`: Command-line interface with on-demand report generation support.
 
 ## Resilience

@@ -16,9 +16,9 @@
 - Every implementation must be carefully thought through
 - Every git commit requires a clear summary of the changes. Append every message with the following text:
     ```
-    🤖 Generated with [Deepseek V3.1](https://api-docs.deepseek.com/news/news250821) using [Zed](https://zed.dev/)
+    🤖 Generated with [Qwen3 Coder](https://openrouter.ai/qwen/qwen3-coder) using [Zed](https://zed.dev/)
 
-    Co-Authored-By: Deepseek V3.1 <service@deepseek.com>
+    Co-Authored-By: Qwen3 Coder <qianwen_opensource@alibabacloud.com>
     ```.
 
 ### File Constraints

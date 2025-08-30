@@ -9,7 +9,7 @@ class Config:
         self.interval_sec: int = 30
         self.csv_time: str = "07:00"
         self.cache_path: str = "data/cache.db"
-        self.output_dirs: Dict[str, str] = {"daily": "data/daily", "weekly": "data/weekly"}
+        self.output_dirs: Dict[str, str] = {"daily": "data/reports/daily", "weekly": "data/reports/weekly"}
         self.csv_retention_days: int = 30
         self.disk_usage_threshold: int = 90
 

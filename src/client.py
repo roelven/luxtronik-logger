@@ -62,8 +62,13 @@ class HeatPumpClient:
                     try:
                         entry = self.connection.calculations.get(i)
                         if hasattr(entry, 'value'):
-                            key_name = entry.name if hasattr(entry, 'name') and not entry.name.startswith('Unknown') else f"calculations.{i}"
-                            calculations_dict[f"calculations.{key_name}"] = entry.value
+                            if hasattr(entry, 'name') and not entry.name.startswith('Unknown'):
+                                # Known entry - use the name directly
+                                key_name = f"calculations.{entry.name}"
+                            else:
+                                # Unknown entry - use index-based name
+                                key_name = f"calculations.{i}"
+                            calculations_dict[key_name] = entry.value
                     except Exception as e:
                         self.logger.debug(f"Failed to get calculations.{i}: {e}")
 
@@ -72,8 +77,13 @@ class HeatPumpClient:
                     try:
                         entry = self.connection.parameters.get(i)
                         if hasattr(entry, 'value'):
-                            key_name = entry.name if hasattr(entry, 'name') and not entry.name.startswith('Unknown') else f"parameters.{i}"
-                            parameters_dict[f"parameters.{key_name}"] = entry.value
+                            if hasattr(entry, 'name') and not entry.name.startswith('Unknown'):
+                                # Known entry - use the name directly
+                                key_name = f"parameters.{entry.name}"
+                            else:
+                                # Unknown entry - use index-based name
+                                key_name = f"parameters.{i}"
+                            parameters_dict[key_name] = entry.value
                     except Exception as e:
                         self.logger.debug(f"Failed to get parameters.{i}: {e}")
 
@@ -82,8 +92,13 @@ class HeatPumpClient:
                     try:
                         entry = self.connection.visibilities.get(i)
                         if hasattr(entry, 'value'):
-                            key_name = entry.name if hasattr(entry, 'name') and not entry.name.startswith('Unknown') else f"visibilities.{i}"
-                            visibilities_dict[f"visibilities.{key_name}"] = entry.value
+                            if hasattr(entry, 'name') and not entry.name.startswith('Unknown'):
+                                # Known entry - use the name directly
+                                key_name = f"visibilities.{entry.name}"
+                            else:
+                                # Unknown entry - use index-based name
+                                key_name = f"visibilities.{i}"
+                            visibilities_dict[key_name] = entry.value
                     except Exception as e:
                         self.logger.debug(f"Failed to get visibilities.{i}: {e}")
 

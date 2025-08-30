@@ -1,3 +1,6 @@
 pyyaml>=6.0
 luxtronik @ git+https://github.com/Bouni/python-luxtronik.git@7a0eda74067caee4946fd624bc18a0eb32d43df8
 apscheduler>=3.9
+nicegui>=1.4.0
+fastapi>=0.68.0
+uvicorn>=0.15.0
