@@ -12,12 +12,12 @@ set -e
 # Common fixes if connection fails:
 # sudo sysctl -w net.ipv4.conf.all.rp_filter=0
 # sudo sysctl -w net.ipv4.conf.ens18.rp_filter=0
-# sudo sysctl -w net.ipv4.ip_forward=1i
+# sudo sysctl -w net.ipv4.ip_forward=1
 
 # Print routing table for debugging
 echo "Current routing table:"
 ip route show
 
-# Start the application
+# Start the application with passed arguments
 echo "Starting Luxtronik Logger..."
-exec python main.py
+exec "$@"

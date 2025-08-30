@@ -6,10 +6,16 @@ from datetime import datetime
 from typing import Dict, List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
-import nicegui
+import uvicorn
+from nicegui import ui
+import logging
 
-# Initialize FastAPI app
-app = FastAPI(title="Luxtronik Logger Web Interface", version="1.0.0")
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Initialize FastAPI app for API endpoints
+api_app = FastAPI(title="Luxtronik Logger API", version="1.0.0")
 
 # Configuration - using same paths as main logger
 DB_PATH = "data/cache.db"
@@ -93,24 +99,24 @@ def get_csv_reports() -> Dict:
 
     return reports
 
-@app.get("/status")
+@api_app.get("/status")
 async def get_status():
     """Get latest heat pump status"""
     return get_latest_sensor_data()
 
-@app.get("/reports")
+@api_app.get("/reports")
 async def get_reports():
     """Get list of available CSV reports"""
     return get_csv_reports()
 
-@app.get("/download/{report_type}/{filename}")
+@api_app.get("/download/{report_type}/{filename}")
 async def download_report(report_type: str, filename: str):
     """Download a CSV report file"""
     # Validate report type
     if report_type not in ["daily", "weekly"]:
         raise HTTPException(status_code=400, detail="Invalid report type")
 
-    # Validate filename (prevent directory traversal) - do this BEFORE constructing file path
+    # Validate filename (prevent directory traversal)
     if ".." in filename or "/" in filename or "\\" in filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
 
@@ -127,12 +133,12 @@ async def download_report(report_type: str, filename: str):
     # Return file response
     return FileResponse(file_path, media_type='text/csv', filename=filename)
 
+# Add API routes directly to NiceGUI's app (we'll do this in start_web_interface)
+
 # Create NiceGUI interface
-@nicegui.ui.page('/')
+@ui.page('/')
 def main_page():
     """Main dashboard page"""
-    from nicegui import ui
-
     # Header
     with ui.header().classes('justify-between'):
         ui.label('Luxtronik Logger Dashboard').classes('text-h6')
@@ -164,12 +170,7 @@ def main_page():
     # Reports section
     with ui.card().classes('w-full'):
         ui.label('Available Reports').classes('text-h6')
-        reports_table = ui.table(columns=[
-            {'name': 'filename', 'label': 'Filename', 'field': 'filename'},
-            {'name': 'size', 'label': 'Size', 'field': 'size'},
-            {'name': 'modified', 'label': 'Modified', 'field': 'modified'},
-            {'name': 'actions', 'label': 'Actions', 'field': 'actions'}
-        ], rows=[]).classes('w-full')
+        reports_container = ui.column().classes('w-full')
 
     # Load initial data
     def update_status():
@@ -192,50 +193,76 @@ def main_page():
             ui.notify(f"Failed to update status: {str(e)}")
 
     def update_reports():
-        """Update reports table"""
-        try:
-            reports_data = get_csv_reports()
-            rows = []
+            """Update reports list"""
+            try:
+                # Clear existing reports
+                reports_container.clear()
 
-            # Add daily reports
-            for report in reports_data['daily_reports']:
-                rows.append({
-                    'filename': report['filename'],
-                    'size': f"{report['size_bytes'] / 1024:.1f} KB",
-                    'modified': report['modified'],
-                    'actions': f"[Download](/download/daily/{report['filename']})"
-                })
+                reports_data = get_csv_reports()
 
-            # Add weekly reports
-            for report in reports_data['weekly_reports']:
-                rows.append({
-                    'filename': report['filename'],
-                    'size': f"{report['size_bytes'] / 1024:.1f} KB",
-                    'modified': report['modified'],
-                    'actions': f"[Download](/download/weekly/{report['filename']})"
-                })
+                # Add section headers and reports
+                with reports_container:
+                    if reports_data['daily_reports']:
+                        ui.label('Daily Reports').classes('text-subtitle1 mt-4')
+                        for report in reports_data['daily_reports']:
+                            with ui.card().classes('w-full mb-2'):
+                                with ui.row().classes('justify-between items-center w-full'):
+                                    with ui.column().classes('items-start'):
+                                        ui.label(report['filename']).classes('font-bold')
+                                        # Convert datetime format from ISO to dd-mm-yyyy hh:mm
+                                        modified_datetime = datetime.fromisoformat(report['modified'].replace('Z', '+00:00'))
+                                        formatted_date = modified_datetime.strftime('%d-%m-%Y %H:%M')
+                                        ui.label(f"Size: {report['size_bytes'] / 1024:.1f} KB | Modified: {formatted_date}").classes('text-caption')
+                                    ui.button('Download', on_click=lambda filename=report['filename']: ui.download(f"/api/download/daily/{filename}")).classes('align-self-end')
 
-            reports_table.rows = rows
-            reports_table.update()
-        except Exception as e:
-            ui.notify(f"Failed to update reports: {str(e)}")
+                    if reports_data['weekly_reports']:
+                        ui.label('Weekly Reports').classes('text-subtitle1 mt-4')
+                        for report in reports_data['weekly_reports']:
+                            with ui.card().classes('w-full mb-2'):
+                                with ui.row().classes('justify-between items-center w-full'):
+                                    with ui.column().classes('items-start'):
+                                        ui.label(report['filename']).classes('font-bold')
+                                        # Convert datetime format from ISO to dd-mm-yyyy hh:mm
+                                        modified_datetime = datetime.fromisoformat(report['modified'].replace('Z', '+00:00'))
+                                        formatted_date = modified_datetime.strftime('%d-%m-%Y %H:%M')
+                                        ui.label(f"Size: {report['size_bytes'] / 1024:.1f} KB | Modified: {formatted_date}").classes('text-caption')
+                                    ui.button('Download', on_click=lambda filename=report['filename']: ui.download(f"/api/download/weekly/{filename}")).classes('align-self-end')
 
-    # Initial load
+                    if not reports_data['daily_reports'] and not reports_data['weekly_reports']:
+                        ui.label('No reports available').classes('text-center text-gray italic')
+
+            except Exception as e:
+                ui.notify(f"Failed to update reports: {str(e)}")
+
+    # Add refresh buttons
+    with ui.row():
+        ui.button('Refresh Status', on_click=update_status).classes('mx-2')
+        ui.button('Refresh Reports', on_click=update_reports).classes('mx-2')
+
+    # Auto-refresh data every 30 seconds
+    ui.timer(30.0, update_status)
+    ui.timer(60.0, update_reports)
+
+    # Load initial data
     update_status()
     update_reports()
 
-    # Auto-refresh every 30 seconds
-    ui.timer(30, update_status)
-    ui.timer(60, update_reports)
+def start_web_interface(host="0.0.0.0", port=8000):
+    """Start the web interface with both FastAPI and NiceGUI"""
+    logger.info(f"Starting web interface on {host}:{port}")
 
-def start_web_interface(port: int = 8000):
-    """Start the web interface"""
-    # Ensure reports directories exist
-    os.makedirs(DAILY_REPORTS_DIR, exist_ok=True)
-    os.makedirs(WEEKLY_REPORTS_DIR, exist_ok=True)
+    # Add our API routes to NiceGUI's FastAPI app
+    from nicegui import app as nicegui_app
+    nicegui_app.mount("/api", api_app)
 
-    # Start NiceGUI
-    nicegui.ui.run(host='0.0.0.0', port=port, show=False, reload=False, title="Luxtronik Logger Dashboard")
+    # Run the application
+    ui.run(
+        host=host,
+        port=port,
+        title="Luxtronik Logger",
+        reload=False,
+        storage_secret="luxtronik_logger_secret"  # In production, use a secure secret
+    )
 
 if __name__ == "__main__":
     start_web_interface()
