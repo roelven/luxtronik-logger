@@ -2,13 +2,13 @@ import pytest
 import os
 import tempfile
 from fastapi.testclient import TestClient
-from src.web import app, DAILY_REPORTS_DIR, WEEKLY_REPORTS_DIR
+from src.web import api_app, DAILY_REPORTS_DIR, WEEKLY_REPORTS_DIR
 
-client = TestClient(app)
+client = TestClient(api_app)
 
 def test_fastapi_status_endpoint():
     """Test that the FastAPI status endpoint works"""
-    response = client.get("/api/status")
+    response = client.get("/status")
     # This should return 200 OK or 404 if no data, but not 500
     assert response.status_code in [200, 404, 500]
 
@@ -30,7 +30,7 @@ def test_fastapi_reports_endpoint():
             web_module.DAILY_REPORTS_DIR = daily_dir
             web_module.WEEKLY_REPORTS_DIR = weekly_dir
 
-            response = client.get("/api/reports")
+            response = client.get("/reports")
             # This should return 200 OK
             assert response.status_code == 200
         finally:

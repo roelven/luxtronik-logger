@@ -3,9 +3,9 @@ import os
 import json
 from datetime import datetime
 from fastapi.testclient import TestClient
-from src.web import app
+from src.web import api_app
 
-client = TestClient(app)
+client = TestClient(api_app)
 
 def test_web_integration_with_real_data():
     """Integration test for web interface with real database data"""
